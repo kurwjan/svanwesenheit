@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+            crossorigin="anonymous"></script>
+
+    <title>SV-Anwesenheit</title>
+</head>
+<body style="background: linear-gradient(rgba(255,255,255,0.30), rgba(255,255,255,0.30)), url('../static/bg.jpg') no-repeat fixed; background-size: cover;">
+<nav class="navbar navbar-expand-md navbar-last hidden-print sticky navbar-dark" style="background: #264a7c">
+    <div class="container">
+        <div class="navbar-brand" id="title">SV-Anwesenheit</div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Heute</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<main class="container py-3 text-white">
+    {% block main %}{% endblock %}
+</main>
+</body>
+</html>
