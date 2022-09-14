@@ -16,10 +16,11 @@ app.config['MYSQL_DATABASE_DB'] = input("Enter database: ")
 app.config['MYSQL_DATABASE_HOST'] = input("Enter host: ")
 
 db = MySQL(app)
-"""
+
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+"""
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
@@ -34,6 +35,7 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
 
 @app.route('/')
 def login():
