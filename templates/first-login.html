@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-sm-12 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i>
+                    Erster Login
+                </div>
+                <div class="card-body text-dark">
+                    <p class="fw-semibold">Das ist dein erster Login, ändere dein Passwort</p>
+                    <form>
+                        <div class="mb-3">
+                            <label for="username" class="mb-1 form-fabel">Passwort</label>
+                            <input type="text" class="form-control" id="username" aria-describedby="usernameHelp">
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwort" class="mb-1 form-fabel">Password wieder</label>
+                            <input type="password" class="form-control" id="passwort" aria-describedby="passwortHelp">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Fertig</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

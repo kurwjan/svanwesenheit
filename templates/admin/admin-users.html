@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#add_user_model">Hinzufüge eine neue
+            Person
+        </button>
+        <div class="row row-cols-2 row-cols-md-2 g-2">
+            <div class="col">
+                <div class="card border-danger mb-3">
+                    <div class="card-header text-black">Amtbezeichnung</div>
+                    <div class="card-body text-danger">
+                        <h5 class="card-title">Name</h5>
+                        <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <button type="button" class="btn btn-danger">Password zurücksetzen</button>
+                        <button type="button" class="btn btn-danger">Blocken</button>
+                    </div>
+                    <div class="card-footer text-black">Typ</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-primary mb-3">
+                    <div class="card-header text-black">Amtbezeichnung</div>
+                    <div class="card-body text-primary">
+                        <h5 class="card-title">Name</h5>
+                        <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <button type="button" class="btn btn-primary">Password zurücksetzen</button>
+                        <button type="button" class="btn btn-primary">Blocken</button>
+                    </div>
+                    <div class="card-footer text-black">Typ</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-secondary mb-3">
+                    <div class="card-header text-black">Amtbezeichnung</div>
+                    <div class="card-body text-secondary">
+                        <h5 class="card-title">Name</h5>
+                        <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <button type="button" class="btn btn-secondary">Password zurücksetzen</button>
+                        <button type="button" class="btn btn-secondary">Blocken</button>
+                    </div>
+                    <div class="card-footer text-black">Typ</div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- add user modal -->
+        <div class="modal fade text-dark text-dark" id="add_user_model" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Person hinzufügen</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Zurück"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Name" id="non_elected_textbox">
+                            <label class="input-group-text" for="inputGroupSelect01">Typ</label>
+                            <select class="form-select" id="inputGroupSelect01">
+                                <option value="1">Admin</option>
+                                <option value="2">Bearbeiter</option>
+                                <option value="3">Normal</option>
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="">Hinzufügen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

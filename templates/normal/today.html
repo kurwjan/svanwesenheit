@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        {% if status == 0 %}
+            <!-- Not yet set -->
+            <div class="col-md-8 col-sm-12 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-circle-question me-1"></i>
+                        Keine Anwesenheitsliste
+                    </div>
+                    <div class="card-body text-dark">
+                        <p>Es existiert keine Anwesenheitsliste, entweder heute ist keine SV oder die Anwesenheitsliste wurde noch nicht fertig gestellt</p>
+                    </div>
+                </div>
+            </div>
+        {% elif status == 1 %}
+            <!-- cancelled -->
+            <div class="col-md-8 col-sm-12 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-ban me-1"></i>
+                        Ausfall
+                    </div>
+                    <div class="card-body text-dark">
+                        <p>Heute fällt die SV aus.</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- overview -->
+            <div>
+                <!-- elected positions-->
+                <div class="row row-cols-2 row-cols-md-2 g-2">
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body text-dark">
+                                <h5 class="card-title">Name</h5>
+                                <p style="margin-bottom: 0;" class="card-text fst-italic">Entschuldigt</p>
+                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                <h5 class="card-title mt-3">Hinweise</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">Amtbezeichnung</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- non elected positions-->
+                <div class="card" style="margin-top: 1rem">
+                    <div class="card-header" style="background-color: #337ab7">
+                        <i class="fa-solid fa-person me-1"></i>
+                        Freiwillige Personen
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless table-hover" id="non_elected_table">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- other persons-->
+                <div class="card" style="margin-top: 1rem">
+                    <div class="card-header" style="background-color: #337ab7">
+                        <i class="fa-solid fa-person-rays me-1"></i>
+                        Andere Personen
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless table-hover" id="other_persons_table">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

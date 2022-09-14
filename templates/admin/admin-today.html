@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+
+{% block scripts %}
+    <!-- Show/hide reason text box and extend tables-->
+    <script src="static/scripts/admin-today.js"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        {% if status == 0 %}
+            <!-- Not yet set -->
+            <button class="btn btn-primary mb-3">Neue SV-Stunde</button>
+            <button class="btn btn-primary">Entfall</button>
+        {% elif status == 1 %}
+            <!-- cancelled -->
+            <div class="col-md-8 col-sm-12 col-12">
+                <div class="card">
+                    <div class="card-header header-lanis-color">
+                        <i class="fa-solid fa-ban me-1"></i>
+                        Ausfall
+                    </div>
+                    <div class="card-body text-dark">
+                        <p>Heute fällt die SV aus.</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- overview -->
+            <div>
+                <!-- elected positions-->
+                <div class="row row-cols-2 row-cols-md-2 g-2">
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body text-dark">
+                                <h5 class="card-title">Name</h5>
+                                <form id="today_form" method="post">
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="input1" value="anwesend" id="anwesend-1"
+                                               onclick="hide('entschuldigt-1-textbox')"/>
+                                        <label class="form-check-label" for="anwesend-1"> Anwesend</label>
+                                    </div>
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="input1" value="fehlend" id="fehlend-1"
+                                               onclick="hide('entschuldigt-1-textbox')"/>
+                                        <label class="form-check-label" for="fehlend-1"> Fehlend</label>
+                                    </div>
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="input1" value="entschuldigt"
+                                               id="entschuldigt-1" onclick="show('entschuldigt-1-textbox')"/>
+                                        <label class="form-check-label" for="entschuldigt-1"> Entschuldigt</label>
+                                    </div>
+                                    <input style="display: none;" type="text" class="form-control" name="input1"
+                                           placeholder="Grund" id="entschuldigt-1-textbox">
+                                </form>
+                                <h5 class="card-title mt-3">Hinweise</h5>
+                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">Amtbezeichnung</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- non elected positions-->
+                <div class="card" style="margin-top: 1rem">
+                    <div class="card-header" style="background-color: #337ab7">
+                        <i class="fa-solid fa-person me-1"></i>
+                        Freiwillige Personen
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless table-hover" id="non_elected_table">
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#not_elected_modal">
+                            Hinzufüge
+                        </button>
+                    </div>
+                </div>
+                <!-- other persons-->
+                <div class="card" style="margin-top: 1rem">
+                    <div class="card-header" style="background-color: #337ab7">
+                        <i class="fa-solid fa-person-rays me-1"></i>
+                        Andere Personen
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless table-hover" id="other_persons_table">
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#other_persons_modal">
+                            Hinzufüge
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- not elected modal -->
+            <div class="modal fade text-dark" id="not_elected_modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Freiwilligen hinzufügen</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Zurück"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" placeholder="Name" id="non_elected_textbox">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
+                            <button type="button" class="btn btn-primary" onclick="add_person('non_elected_table', 'non_elected_textbox', 'non_name')">Hinzufügen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- other persons modal -->
+            <div class="modal fade text-dark" id="other_persons_modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Andere Person hinzufügen</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Zurück"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" placeholder="Name" id="other_persons_textbox">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
+                            <button type="button" class="btn btn-primary" onclick="add_person('other_persons_table', 'other_persons_textbox', 'other_name')">Hinzufügen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input class="btn btn-primary mt-3" form="today_form" type="submit" value="Fertig" name="btn">
+        {% endif %}
+    </div>
+
+{% endblock %}
