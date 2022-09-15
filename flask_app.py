@@ -7,16 +7,12 @@ from getpass import getpass
 
 app = Flask(__name__)
 
-"""
-app.secret_key = 'deeznuts'
-
 app.config['MYSQL_DATABASE_USER'] = input("Enter username: ")
 app.config['MYSQL_DATABASE_PASSWORD'] = getpass("Enter password: ")
 app.config['MYSQL_DATABASE_DB'] = input("Enter database: ")
 app.config['MYSQL_DATABASE_HOST'] = input("Enter host: ")
 
 db = MySQL(app)
-"""
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -36,10 +32,22 @@ def after_request(response):
     return response
 
 
+@app.route("/", methods=["GET", "POST"])
 @app.route('/')
-def login():
-    return render_template("test.html")
+def create_user():
+    if request.method == "POST":
+        username = request.form.get("username")
+        usertype = request.form.get("usertype")
+
+        cur = db.connection.cursor()
+        cur.execute('INSERT INTO users (username, hash, type, blocked) VALUES (%s, "PASSWORD", %s, "false")', (username, usertype))
+        db.connection.commit()
+        cur.close()
+
+        return render_template("/admin/admin-users.html")
+    else:
+        return render_template("/admin/admin-users.html")
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

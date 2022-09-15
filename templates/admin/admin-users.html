@@ -9,42 +9,43 @@
             <div class="col">
                 <div class="card border-danger mb-3">
                     <div class="card-header text-black">Amtbezeichnung</div>
-                    <div class="card-body text-danger">
+                    <div class="card-body flex-column d-flex text-danger">
                         <h5 class="card-title">Name</h5>
                         <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                        <button type="button" class="btn btn-danger">Password zurücksetzen</button>
+                        <button type="button" class="btn btn-outline-danger mb-1">Historie</button>
+                        <button type="button" class="btn btn-danger mb-1">Password zurücksetzen</button>
                         <button type="button" class="btn btn-danger">Blocken</button>
                     </div>
-                    <div class="card-footer text-black">Typ</div>
+                    <div class="card-footer text-black">Admin</div>
                 </div>
             </div>
             <div class="col">
                 <div class="card border-primary mb-3">
                     <div class="card-header text-black">Amtbezeichnung</div>
-                    <div class="card-body text-primary">
+                    <div class="card-body flex-column d-flex text-primary">
                         <h5 class="card-title">Name</h5>
                         <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                        <button type="button" class="btn btn-primary">Password zurücksetzen</button>
+                        <button type="button" class="btn btn-outline-primary mb-1">Historie</button>
+                        <button type="button" class="btn btn-primary mb-1">Password zurücksetzen</button>
                         <button type="button" class="btn btn-primary">Blocken</button>
                     </div>
-                    <div class="card-footer text-black">Typ</div>
+                    <div class="card-footer text-black">Bearbeiter</div>
                 </div>
             </div>
             <div class="col">
                 <div class="card border-secondary mb-3">
                     <div class="card-header text-black">Amtbezeichnung</div>
-                    <div class="card-body text-secondary">
+                    <div class="card-body flex-column d-flex text-secondary">
                         <h5 class="card-title">Name</h5>
                         <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                        <button type="button" class="btn btn-secondary">Password zurücksetzen</button>
+                        <button type="button" class="btn btn-outline-secondary mb-1">Historie</button>
+                        <button type="button" class="btn btn-secondary mb-1">Password zurücksetzen</button>
                         <button type="button" class="btn btn-secondary">Blocken</button>
                     </div>
-                    <div class="card-footer text-black">Typ</div>
+                    <div class="card-footer text-black">Normal</div>
                 </div>
             </div>
         </div>
-
-
         <!-- add user modal -->
         <div class="modal fade text-dark text-dark" id="add_user_model" tabindex="-1">
             <div class="modal-dialog">
@@ -55,22 +56,21 @@
                                 aria-label="Zurück"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Name" id="non_elected_textbox">
-                            <label class="input-group-text" for="inputGroupSelect01">Typ</label>
-                            <select class="form-select" id="inputGroupSelect01">
-                                <option value="1">Admin</option>
-                                <option value="2">Bearbeiter</option>
-                                <option value="3">Normal</option>
-                            </select>
-
-                        </div>
+                        <form id="add_user_form" method="post">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" placeholder="Name" name="username" id="user_name_textbox">
+                                <label class="input-group-text" for="user_type_select">Typ</label>
+                                <select class="form-select" name="usertype" id="user_type_select">
+                                    <option value="admin">Admin</option>
+                                    <option value="editor">Bearbeiter</option>
+                                    <option value="normal">Normal</option>
+                                </select>
+                            </div>
+                        </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
-                        <button type="button" class="btn btn-primary"
-                                onclick="">Hinzufügen
-                        </button>
+                        <input class="btn btn-primary" form="add_user_form" type="submit" value="Hinzufügen" name="btn">
                     </div>
                 </div>
             </div>
