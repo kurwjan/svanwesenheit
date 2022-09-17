@@ -4,21 +4,23 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-sm-12 col-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header header-lanis-color">
                     <i class="fa-solid fa-right-to-bracket me-1"></i>
                     Erster Login
                 </div>
                 <div class="card-body text-dark">
                     <p class="fw-semibold">Das ist dein erster Login, ändere dein Passwort</p>
-                    <form>
+                    <form method="post">
                         <div class="mb-3">
-                            <label for="username" class="mb-1 form-fabel">Passwort</label>
-                            <input type="text" class="form-control" id="username" aria-describedby="usernameHelp">
+                            <label for="new_password" class="mb-1 form-fabel">Passwort</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password">
                         </div>
                         <div class="mb-3">
-                            <label for="passwort" class="mb-1 form-fabel">Password wieder</label>
-                            <input type="password" class="form-control" id="passwort" aria-describedby="passwortHelp">
+                            <label for="confirmation" class="mb-1 form-fabel">Passwortbestätigung</label>
+                            <input type="password" class="form-control" id="confirmation" name="confirmation">
                         </div>
+                        <!-- quick hack for new user login function -->
+                        <input type='hidden' name="first_login" value="first_login">
                         <button type="submit" class="btn btn-primary">Fertig</button>
                     </form>
                 </div>

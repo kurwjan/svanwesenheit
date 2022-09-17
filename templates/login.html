@@ -1,24 +1,52 @@
 {% extends "layout.html" %}
 
+{% block scripts %}
+    <script src="static/scripts/login.js"></script>
+{% endblock %}
+
 {% block main %}
     <div class="row justify-content-center">
         <div class="col-md-8 col-sm-12 col-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header header-lanis-color">
                     <i class="fa-solid fa-right-to-bracket me-1"></i>
                     Login
                 </div>
                 <div class="card-body text-dark">
-                    <form>
+                    <form method="post">
                         <div class="mb-3">
                             <label for="username" class="mb-1 form-fabel">Benutzer</label>
-                            <input type="text" class="form-control" id="username" aria-describedby="usernameHelp">
+                            <input type="text" class="form-control" id="username" name="username" aria-describedby="usernameHelp">
                         </div>
                         <div class="mb-3">
                             <label for="passwort" class="mb-1 form-fabel">Passwort</label>
-                            <input type="password" class="form-control" id="passwort" aria-describedby="passwortHelp">
+                            <input type="password" class="form-control" id="password" name="password" aria-describedby="passwortHelp">
                         </div>
                         <button type="submit" class="btn btn-primary mb-1">Fertig</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center" style="display: none;">
+        <div class="col-md-8 col-sm-12 col-12">
+            <div class="card">
+                <div class="card-header header-lanis-color">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i>
+                    Erster Login
+                </div>
+                <div class="card-body text-dark">
+                    <p class="fw-semibold">Das ist dein erster Login, ändere dein Passwort</p>
+                    <form>
+                        <div class="mb-3">
+                            <label for="new_password" class="mb-1 form-fabel">Passwort</label>
+                            <input type="password" class="form-control" id="new_password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmation" class="mb-1 form-fabel">Password wieder</label>
+                            <input type="password" class="form-control" id="confirmation">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Fertig</button>
                     </form>
                 </div>
             </div>
