@@ -35,6 +35,18 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
             return redirect("/login")
+        else:
+            cur = db.connection.cursor()
+
+            # Select something in users table from current user_id
+            cur.execute('SELECT username FROM users WHERE id = %s', [session.get("user_id")])
+            check = cur.fetchone()
+
+            # If account is deleted or so, redirect to log in
+            if not check:
+                session.clear()
+                return redirect("/login")
+
         return f(*args, **kwargs)
 
     return decorated_function
@@ -42,7 +54,7 @@ def login_required(f):
 
 def admin_required(f):
     """
-    Decorate routes to require login.
+    Decorate routes to require admin type account.
 
     https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
     """
@@ -58,7 +70,7 @@ def admin_required(f):
 
 def editor_required(f):
     """
-    Decorate routes to require login.
+    Decorate routes to require editor type account or higher.
 
     https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
     """
@@ -248,7 +260,7 @@ def a_create_user():
         db.connection.commit()
         cur.close()
 
-        return redirect('/create_user')
+        return redirect('/a_create_user')
     else:
         # Query users
         cur = db.connection.cursor()
@@ -327,13 +339,13 @@ def login():
 
             # Update password in database
             cur = db.connection.cursor()
-            cur.execute('UPDATE users SET hash = %s WHERE id = %s',
+            cur.execute('UPDATE users SET hash = %s, reset = 0 WHERE id = %s',
                         (generate_password_hash(request.form.get("confirmation")), session["user_id"]))
             db.connection.commit()
             cur.close()
 
             # Redirect to main page
-            return redirect("/")
+            return redirect("/a")
 
         username = request.form.get("username")
         password = request.form.get("password")
@@ -373,11 +385,11 @@ def login():
         # Remember which user has logged in
         session["user_id"] = row[0]
 
-        # Remeber user account type
+        # Remember user account type
         session["user_type"] = row[3]
 
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/a")
     else:
         session.clear()
         return render_template("login.html")
