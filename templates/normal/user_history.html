@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="col-md-12 col-sm-12 col-12">
+            <div class="card" style="margin-top: 1rem">
+                <div class="card-header" style="background-color: #337ab7">
+                    <i class="fa-solid fa-person me-1"></i>
+                    {{ person }}
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless table-hover" id="non_elected_table" style="table-layout: fixed;">
+                        <tr>
+                            <th>Datum</th>
+                            <th>Status</th>
+                            <th>Grund</th>
+                        </tr>
+                        {% for row in history %}
+                            <tr>
+                                <td>{{ row[0] }}</td>
+                                <td>{{ row[1][0] }}</td>
+                                {% if row[1][1] != None %}
+                                    <td>{{ row[1][1] }}</td>
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

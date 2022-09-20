@@ -47,3 +47,15 @@ footer a:hover {
     color: #FFFFFF;
     text-decoration: underline;
 }
+
+/* Horizontal scrolling table */
+.scrolling-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+/*.small smaller font for index page card footers*/
+.small-index {
+    font-size: .841em !important;
+}

@@ -35,22 +35,22 @@
                                 <div class="card-body text-dark">
                                     <h5 class="card-title">{{ person[1] }}</h5>
                                     <div class="input-group mb-1">
-                                        <input class="me-1" type="radio" name="{{ person[0] }}" form="today_form"
-                                               value="anwesend"
+                                        <input class="me-1" type="radio" name="{{ person[0] }}" checked form="today_form"
+                                               value="Anwesend"
                                                id="anwesend-{{ person[0] }}"
                                                onclick="hide('entschuldigt-{{ person[0] }}-textbox')"/>
                                         <label class="form-check-label" for="anwesend-{{ person[0] }}"> Anwesend</label>
                                     </div>
                                     <div class="input-group mb-1">
                                         <input class="me-1" type="radio" name="{{ person[0] }}" form="today_form"
-                                               value="fehlend"
+                                               value="Fehlend"
                                                id="fehlend-{{ person[0] }}"
                                                onclick="hide('entschuldigt-{{ person[0] }}-textbox')"/>
                                         <label class="form-check-label" for="fehlend-{{ person[0] }}"> Fehlend</label>
                                     </div>
                                     <div class="input-group mb-1">
                                         <input class="me-1" type="radio" name="{{ person[0] }}" form="today_form"
-                                               value="entschuldigt"
+                                               value="Entschuldigt"
                                                id="entschuldigt-{{ person[0] }}"
                                                onclick="show('entschuldigt-{{ person[0] }}-textbox')"/>
                                         <label class="form-check-label" for="entschuldigt-{{ person[0] }}">
@@ -65,7 +65,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="card-footer">
-                                    <small class="text-muted">{{ person[3] }}</small>
+                                    <small class="text-muted small-index">{{ person[6] }}</small>
                                 </div>
                             </div>
                         </div>
@@ -78,10 +78,12 @@
                         Freiwillige Personen
                     </div>
                     <div class="card-body">
-                        <table class="table table-borderless table-hover" id="non_elected_table">
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive mb-1">
+                            <table class="table table-borderless table-hover" id="non_elected_table">
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#not_elected_modal">
                             Hinzufüge
@@ -95,10 +97,12 @@
                         Andere Personen
                     </div>
                     <div class="card-body">
-                        <table class="table table-borderless table-hover" id="other_persons_table">
-                            <tbody>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive mb-1">
+                            <table class="table table-borderless table-hover" id="other_persons_table">
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#other_persons_modal">
                             Hinzufüge
@@ -154,7 +158,7 @@
                     </div>
                 </div>
             </div>
-            <input class="btn btn-primary mt-3" form="today_form" type="submit" value="Fertig">
+            <input class="btn btn-primary mt-3 mb-4" form="today_form" type="submit" value="Fertig">
         {% endif %}
     </div>
 
