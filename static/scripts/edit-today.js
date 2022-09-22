@@ -14,5 +14,5 @@ function add_person(table_id, name, name_id) {
 
     let newName = document.getElementById(name).value;
 
-    newCell.outerHTML = "<td>" + newName + "</td><input form='today_form' type='hidden' name=" + name_id + " value=" + newName + ">"
+    newCell.outerHTML = `<td>${newName}</td><input form='today_form' type='hidden' name=${name_id} value='${newName}'>`
 }

@@ -37,9 +37,48 @@
                                     <input type="hidden" name="user_id" value="{{ user[0] }}">
                                     <input type="submit" value="Historie" class="btn btn-outline-danger mb-1">
                                 </form>
-                                <button type="button" class="btn btn-outline-danger mb-1">Ändern</button>
-                                <button type="button" class="btn btn-danger mb-1">Password zurücksetzen</button>
-                                <button type="button" class="btn btn-danger mb-1">Blocken</button>
+                                <button type="button" data-bs-toggle="modal"
+                                        data-bs-target="#change_modal_{{ user[0] }}"
+                                        class="btn btn-outline-danger mb-1">
+                                    Hinweis ändern
+                                </button>
+                                 {% if user[7] == 1 %}
+                                     <button class="btn btn-danger mb-1" disabled>Passwort zurückgesetzt</button>
+                                 {% else %}
+                                    <form id="reset-{{ user[0] }}" action="/reset_user" method="post"
+                                      class="flex-column d-flex mb-1">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen" class="btn btn-danger"
+                                        onclick="deactivate({{ user[0] }})">
+                                    </form>
+                                 {% endif %}
+                                {% if user[4] == 0 %}
+                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: flex !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Blockieren" class="btn btn-danger"
+                                               onclick="block('{{ user[0] }}')">
+                                    </form>
+                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: none !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Entblockieren" class="btn btn-danger"
+                                               onclick="unblock('{{ user[0] }}')">
+                                    </form>
+                                {% else %}
+                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: flex !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Entblockieren" class="btn btn-danger"
+                                               onclick="unblock('{{ user[0] }}')">
+                                    </form>
+                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: none !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Blockieren" class="btn btn-danger"
+                                               onclick="block('{{ user[0] }}')">
+                                    </form>
+                                {% endif %}
                                 <form id="form-{{ user[0] }}" action="/delete_user" method="post"
                                       class="flex-column d-flex">
                                     <input type='hidden' name="user_id" value="{{ user[0] }}">
@@ -76,9 +115,48 @@
                                     <input type="hidden" name="user_id" value="{{ user[0] }}">
                                     <input type="submit" value="Historie" class="btn btn-outline-primary mb-1">
                                 </form>
-                                <button type="button" class="btn btn-outline-primary mb-1">Ändern</button>
-                                <button type="button" class="btn btn-primary mb-1">Password zurücksetzen</button>
-                                <button type="button" class="btn btn-primary mb-1">Blocken</button>
+                                <button type="button" data-bs-toggle="modal"
+                                        data-bs-target="#change_modal_{{ user[0] }}"
+                                        class="btn btn-outline-primary mb-1">
+                                    Hinweis ändern
+                                </button>
+                                {% if user[7] == 1 %}
+                                     <button class="btn btn-primary mb-1" disabled>Passwort zurückgesetzt</button>
+                                 {% else %}
+                                    <form id="reset-{{ user[0] }}" action="/reset_user" method="post"
+                                      class="flex-column d-flex mb-1">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen" class="btn btn-primary"
+                                        onclick="deactivate({{ user[0] }})">
+                                    </form>
+                                 {% endif %}
+                                {% if user[4] == 0 %}
+                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: flex !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Blockieren" class="btn btn-primary"
+                                               onclick="block('{{ user[0] }}')">
+                                    </form>
+                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: none !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Entblockieren" class="btn btn-primary"
+                                               onclick="unblock('{{ user[0] }}')">
+                                    </form>
+                                {% else %}
+                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: flex !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Entblockieren" class="btn btn-primary"
+                                               onclick="unblock('{{ user[0] }}')">
+                                    </form>
+                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: none !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Blockieren" class="btn btn-primary"
+                                               onclick="block('{{ user[0] }}')">
+                                    </form>
+                                {% endif %}
                                 <form id="form-{{ user[0] }}" action="/delete_user" method="post"
                                       class="flex-column d-flex">
                                     <input type='hidden' name="user_id" value="{{ user[0] }}">
@@ -115,9 +193,48 @@
                                     <input type="hidden" name="user_id" value="{{ user[0] }}">
                                     <input type="submit" value="Historie" class="btn btn-outline-secondary mb-1">
                                 </form>
-                                <button type="button" class="btn btn-outline-secondary mb-1">Ändern</button>
-                                <button type="button" class="btn btn-secondary mb-1">Password zurücksetzen</button>
-                                <button type="button" class="btn btn-secondary mb-1">Blocken</button>
+                                <button type="button" data-bs-toggle="modal"
+                                        data-bs-target="#change_modal_{{ user[0] }}"
+                                        class="btn btn-outline-secondary mb-1">
+                                    Hinweis ändern
+                                </button>
+                                {% if user[7] == 1 %}
+                                     <button class="btn btn-secondary mb-1" disabled>Passwort zurückgesetzt</button>
+                                 {% else %}
+                                    <form id="reset-{{ user[0] }}" action="/reset_user" method="post"
+                                      class="flex-column d-flex mb-1">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen" class="btn btn-secondary"
+                                        onclick="deactivate({{ user[0] }})">
+                                    </form>
+                                 {% endif %}
+                                {% if user[4] == 0 %}
+                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: flex !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Blockieren" class="btn btn-secondary"
+                                               onclick="block('{{ user[0] }}')">
+                                    </form>
+                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: none !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Entblockieren" class="btn btn-secondary"
+                                               onclick="unblock('{{ user[0] }}')">
+                                    </form>
+                                {% else %}
+                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: flex !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Entblockieren" class="btn btn-secondary"
+                                               onclick="unblock('{{ user[0] }}')">
+                                    </form>
+                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                          class="flex-column d-flex mb-1" style="display: none !important;">
+                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                        <input type="submit" value="Blockieren" class="btn btn-secondary"
+                                               onclick="block('{{ user[0] }}')">
+                                    </form>
+                                {% endif %}
                                 <form id="form-{{ user[0] }}" action="/delete_user" method="post"
                                       class="flex-column d-flex">
                                     <input type='hidden' name="user_id" value="{{ user[0] }}">
@@ -200,5 +317,32 @@
                 </div>
             </div>
         </div>
+        {% for user in users %}
+            <div class="modal fade text-dark text-dark" id="change_modal_{{ user[0] }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Hinweis ändern</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Zurück"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="change_form_{{ user[0] }}" method="post" action="/change_notice">
+                                <div class="input-group mb-3">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="text" class="form-control" placeholder="Hinweis....." name="notice"
+                                           id="notice_textbox">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
+                            <input class="btn btn-primary" form="change_form_{{ user[0] }}" type="submit" value="Ändern"
+                                   name="btn">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}

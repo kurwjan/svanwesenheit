@@ -9,8 +9,14 @@
     <div class="row justify-content-center">
         {% if status == 0 %}
             <!-- Not yet set -->
-            <button class="btn btn-primary mb-3">Neue SV-Stunde</button>
-            <button class="btn btn-primary">Entfall</button>
+            <form class="row justify-content-center" method="post">
+                <input type="hidden" name="new_day" value="new_day">
+                <input type="submit" value="Neue SV-Stunde" class="btn btn-primary mb-3">
+            </form>
+            <form class="row justify-content-center" method="post">
+                <input type="hidden" name="cancelled" value="cancelled">
+                <input type="submit" value="Entfall" class="btn btn-primary">
+            </form>
         {% elif status == 1 %}
             <!-- cancelled -->
             <div class="col-md-8 col-sm-12 col-12">

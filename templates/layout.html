@@ -38,10 +38,14 @@
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="/a_create_user"><i class="fa-solid fa-user me-1"></i> Personen</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/a_history"><i class="fa-solid fa-clock-rotate-left me-1"></i> Historie</a>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
+{% block history_bar %}{% endblock %}
 {% if get_flashed_messages() %}
     <!-- show error, info or something -->
     <div id="nav2" role="alert">

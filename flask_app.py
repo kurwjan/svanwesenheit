@@ -1,9 +1,11 @@
-from flask import Flask, render_template, session, redirect, request, flash, get_flashed_messages
+import locale
+
+from flask import Flask, render_template, session, redirect, request, flash
 from flask_mysqldb import MySQL
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_session import Session
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -93,6 +95,102 @@ def after_request(response):
     return response
 
 
+@app.route("/", methods=["GET", "POST"])
+@login_required
+def index():
+    return redirect("/a_create_user")
+
+
+@app.route("/a_change_history", methods=["POST"])
+@login_required
+@editor_required
+def change_history():
+    history_id = request.form.get("history_id")
+
+    cur = db.connection.cursor()
+
+    cur.execute('SELECT user_id FROM history_data WHERE person_type = "elected" AND history_id = %s', [history_id])
+    persons = cur.fetchall()
+
+    for person in persons:
+        status = request.form.get(str(person[0]))
+
+        if status == "Entschuldigt":
+            reason = request.form.get("reason-" + str(person[0]))
+
+            cur.execute('UPDATE history_data SET status = %s, reason = %s WHERE user_id = %s AND history_id = %s',
+                        [status, reason, person[0], history_id])
+
+        else:
+            cur.execute('UPDATE history_data SET status = %s, reason = NULL WHERE user_id = %s AND history_id = %s',
+                        [status, person[0], history_id])
+
+    db.connection.commit()
+
+    return redirect("/a_history")
+
+
+@app.route("/a_history")
+@login_required
+@editor_required
+def admin_history():
+    locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
+
+    id = request.args.get("history_id")
+
+    cur = db.connection.cursor()
+
+    if not id:
+        day = datetime.today().strftime('%Y-%m-%d')
+        cur.execute('SELECT id, date, cancelled FROM history WHERE date = %s', [day])
+        history = cur.fetchone()
+
+        if not history:
+            return render_template("/admin/admin-history.html", status=1)
+    else:
+        cur.execute('SELECT id, date, cancelled FROM history WHERE id = %s', [id])
+        history = cur.fetchone()
+
+        if not history:
+            day = datetime.today().strftime('%Y-%m-%d')
+            cur.execute('SELECT id, date, cancelled FROM history WHERE date = %s', [day])
+            history = cur.fetchone()
+
+            if not history:
+                return render_template("/admin/admin-history.html", status=1)
+
+    if history[2] == 1:
+        current_day = history[1]
+        last_day = history[0] - 1
+        next_day = history[0] + 1
+
+        return render_template("/admin/admin-history.html", status=0,
+                               current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
+                               last_day=last_day)
+
+    cur.execute(
+        "SELECT user_id, username, status, reason FROM history_data WHERE person_type = 'elected' AND history_id = %s",
+        [history[0]])
+    persons = cur.fetchall()
+    cur.execute("SELECT non_elected_name FROM history_data WHERE person_type = 'not_elected' AND history_id = %s",
+                [history[0]])
+    not_elected_persons = cur.fetchall()
+    cur.execute("SELECT non_elected_name FROM history_data WHERE person_type = 'other_person' AND history_id = %s",
+                [history[0]])
+    other_persons = cur.fetchall()
+
+    current_day = history[1]
+    last_day = history[0] - 1
+    next_day = history[0] + 1
+
+    cur.close()
+
+    return render_template("/admin/admin-history.html", status=2, not_elected_persons=not_elected_persons,
+                           other_persons=other_persons, persons=persons,
+                           current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
+                           history_id=history[0])
+
+
 @app.route("/user_history", methods=["POST"])
 @login_required
 def user_history():
@@ -148,6 +246,23 @@ def a_index():
 
     # Get data and send it to database
     if request.method == "POST":
+        if request.form.get("new_day"):
+            # Query users
+            cur = db.connection.cursor()
+            cur.execute('SELECT * FROM users')
+            rows = cur.fetchall()
+            print(rows)
+            cur.close()
+
+            return render_template("/admin/edit-today.html", persons=rows, status=2)
+
+        if request.form.get("cancelled"):
+            cur = db.connection.cursor()
+            cur.execute('INSERT INTO history (cancelled, date) VALUES (1, %s)', [datetime.today().strftime('%Y-%m-%d')])
+            db.connection.commit()
+            cur.close()
+            return render_template("/admin/edit-today.html", status=1)
+
         # Query users
         cur = db.connection.cursor()
         cur.execute('SELECT id FROM users')
@@ -175,17 +290,17 @@ def a_index():
         other_persons = request.form.getlist("other_name")
 
         # Debug
-        cur.execute('SET TIMESTAMP=unix_timestamp("2022-04-01")')
+        # cur.execute('SET TIMESTAMP=unix_timestamp("2022-04-01")')
 
         # Create new day in database.
-        cur.execute('INSERT INTO history (cancelled) VALUES (0)')
+        cur.execute('INSERT INTO history (cancelled, date) VALUES (0, %s)', [datetime.today().strftime('%Y-%m-%d')])
         db.connection.commit()
 
         # Debug
-        cur.execute('SELECT id FROM history WHERE date = %s', ["2022-04-01"])
+        # cur.execute('SELECT id FROM history WHERE date = %s', ["2022-04-01"])
 
         # Get id of current SV day.
-        # cur.execute('SELECT id FROM history WHERE date = %s', [datetime.today().strftime('%Y-%m-%d')])
+        cur.execute('SELECT id FROM history WHERE date = %s', [datetime.today().strftime('%Y-%m-%d')])
 
         history_id = cur.fetchone()
 
@@ -210,8 +325,10 @@ def a_index():
                     ' VALUES ("elected", %s, %s, %s, %s)', [history_id, username[0], person[0], person[1]])
 
         # Create new history log with non-elected person ("Freiwillige Personen") names
+        print(non_elected_persons)
         if non_elected_persons:
             for person in non_elected_persons:
+                print(person)
                 cur.execute('INSERT INTO history_data (person_type, history_id, non_elected_name)'
                             ' VALUES ("not_elected", %s, %s)', [history_id, person])
 
@@ -226,14 +343,15 @@ def a_index():
 
         return redirect("/")
     else:
-        # Query users
         cur = db.connection.cursor()
-        cur.execute('SELECT * FROM users')
-        rows = cur.fetchall()
-        print(rows)
+        cur.execute('SELECT cancelled FROM history WHERE date = %s', [datetime.today().strftime('%Y-%m-%d')])
+        check = cur.fetchone()
         cur.close()
 
-        return render_template("/admin/edit-today.html", persons=rows)
+        if not check:
+            return render_template("/admin/edit-today.html", status=0)
+        else:
+            return redirect("/a_history")
 
 
 @app.route("/a_create_user", methods=["GET", "POST"])
@@ -268,7 +386,7 @@ def a_create_user():
         rows = cur.fetchall()
 
         # Get an id from all users
-        cur.execute('SELECT id FROM users')
+        cur.execute('SELECT id FROM users ORDER BY id ASC')
         ids = cur.fetchall()
 
         # Count their status ("Anwesend", "Fehlend", "Entschuldigt")
@@ -310,11 +428,73 @@ def delete_user():
     user_id = request.form.get("user_id")
 
     cur = db.connection.cursor()
+    cur.execute('UPDATE users SET reset = 1 WHERE id = %s', [user_id])
     cur.execute('DELETE FROM users WHERE id = %s', [user_id])
     db.connection.commit()
     cur.close()
 
     return '', 204
+
+
+@app.route("/reset_user", methods=["POST"])
+@login_required
+@admin_required
+def reset_user():
+    """ Reset password of user """
+    user_id = request.form.get("user_id")
+
+    cur = db.connection.cursor()
+    cur.execute('UPDATE users SET reset = 1 WHERE id = %s', [user_id])
+    db.connection.commit()
+    cur.close()
+
+    return '', 204
+
+
+@app.route("/block_user", methods=["POST"])
+@login_required
+@admin_required
+def block_user():
+    """ Block user """
+    user_id = request.form.get("user_id")
+
+    cur = db.connection.cursor()
+    cur.execute('UPDATE users SET blocked = 1 WHERE id = %s', [user_id])
+    db.connection.commit()
+    cur.close()
+
+    return '', 204
+
+
+@app.route("/unblock_user", methods=["POST"])
+@login_required
+@admin_required
+def unblock_user():
+    """ Unblock user """
+    user_id = request.form.get("user_id")
+
+    cur = db.connection.cursor()
+    cur.execute('UPDATE users SET blocked = 0 WHERE id = %s', [user_id])
+    db.connection.commit()
+    cur.close()
+
+    return '', 204
+
+
+@app.route("/change_notice", methods=["POST"])
+@login_required
+@admin_required
+def change_notice():
+    """ Change notice of user """
+    user_id = request.form.get("user_id")
+    notice = request.form.get("notice")
+
+    cur = db.connection.cursor()
+    cur.execute('UPDATE users SET notice = %s WHERE id = %s', [notice, user_id])
+    db.connection.commit()
+    cur.close()
+
+    return redirect("/a_create_user")
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -380,6 +560,10 @@ def login():
         # Ensure password is correct
         if not check_password_hash(row[2], password):
             flash("Falscher Benutzername oder ungültiges Passwort!")
+            return render_template("login.html")
+
+        if row[4] == 1:
+            flash("Dein Konto wurde geblockt!")
             return render_template("login.html")
 
         # Remember which user has logged in
