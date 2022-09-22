@@ -1,10 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "layout.html" %}
 
-</body>
-</html>
+{% block scripts %}
+    <script src="static/scripts/admin_users.js"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="row row-cols-1 row-cols-md-2 g-2">
+            {% for user in users %}
+                {% if user[3] == 'Admin' %}
+                    <div class="col" id="{{ user[0] }}">
+                        <div class="card border-danger mb-3">
+                            <div class="card-header text-black">{{ user[6] }}</div>
+                            <div class="card-body flex-column d-flex text-danger">
+                                <h5 class="card-title">{{ user[1] }}</h5>
+                                <p class="card-text">{{ user[5] }}</p>
+                                <div class="table-responsive">
+                                    <table class="table table-borderless table-hover">
+                                        <tr class="text-danger">
+                                            <th>Anwesend</th>
+                                            <th>Fehlend</th>
+                                            <th>Entschuldigt</th>
+                                        </tr>
+                                        <tr class="text-danger">
+                                            <td>{{ status[loop.index - 1][0][0] }}</td>
+                                            <td>{{ status[loop.index - 1][1][0] }}</td>
+                                            <td>{{ status[loop.index - 1][2][0] }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <form id="history-{{ user[0] }}" action="/user_history" method="post"
+                                      class="flex-column d-flex mt-1">
+                                    <input type="hidden" name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Historie" class="btn btn-danger mb-1">
+                                </form>
+                            </div>
+                            <div class="card-footer text-black">Admin</div>
+                        </div>
+                    </div>
+                {% elif user[3] == 'Bearbeiter' %}
+                    <div class="col" id="{{ user[0] }}">
+                        <div class="card border-primary mb-3">
+                            <div class="card-header text-black">{{ user[6] }}</div>
+                            <div class="card-body flex-column d-flex text-primary">
+                                <h5 class="card-title">{{ user[1] }}</h5>
+                                <p class="card-text">{{ user[5] }}</p>
+                                <div class="table-responsive">
+                                    <table class="table table-borderless table-hover">
+                                        <tr class="text-primary">
+                                            <th>Anwesend</th>
+                                            <th>Fehlend</th>
+                                            <th>Entschuldigt</th>
+                                        </tr>
+                                        <tr class="text-primary">
+                                            <td>{{ status[loop.index - 1][0][0] }}</td>
+                                            <td>{{ status[loop.index - 1][1][0] }}</td>
+                                            <td>{{ status[loop.index - 1][2][0] }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <form id="history-{{ user[0] }}" action="/user_history" method="post"
+                                      class="flex-column d-flex mt-1">
+                                    <input type="hidden" name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Historie" class="btn btn-primary mb-1">
+                                </form>
+                            </div>
+                            <div class="card-footer text-black">Bearbeiter</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col" id="{{ user[0] }}">
+                        <div class="card border-secondary mb-3">
+                            <div class="card-header text-black">{{ user[6] }}</div>
+                            <div class="card-body flex-column d-flex text-secondary">
+                                <h5 class="card-title">{{ user[1] }}</h5>
+                                <p class="card-text">{{ user[5] }}</p>
+                                <div class="table-responsive">
+                                    <table class="table table-borderless table-hover">
+                                        <tr class="text-secondary">
+                                            <th>Anwesend</th>
+                                            <th>Fehlend</th>
+                                            <th>Entschuldigt</th>
+                                        </tr>
+                                        <tr class="text-secondary">
+                                            <td>{{ status[loop.index - 1][0][0] }}</td>
+                                            <td>{{ status[loop.index - 1][1][0] }}</td>
+                                            <td>{{ status[loop.index - 1][2][0] }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <form id="history-{{ user[0] }}" action="/user_history" method="post"
+                                      class="flex-column d-flex mt-1">
+                                    <input type="hidden" name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Historie" class="btn btn-secondary mb-1">
+                                </form>
+                            </div>
+                            <div class="card-footer text-black">Normal</div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div>
+            <div class="card mb-4">
+                <div class="card-header header-lanis-color">
+                    <i class="fa-solid fa-user me-1"></i>
+                    Freiwillige Personen
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless table-hover">
+                            <tr>
+                                <th>Name</th>
+                                <th>Teilgenommen</th>
+                            </tr>
+                            {% for persons in not_elected_persons %}
+                                <tr>
+                                    <td>{{ persons[0] }}</td>
+                                    <td>{{ persons[1] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
