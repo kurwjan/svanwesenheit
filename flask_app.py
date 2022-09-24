@@ -223,7 +223,7 @@ def a_index():
                 cur.execute('INSERT INTO history_data (person_type, history_id, non_elected_name)'
                             ' VALUES (%s, %s, %s)', ["not_elected", history_id, person])
 
-        # Create new history log with other person (other people than "Freiwilige Personen") names
+        # Create new history log with other person (other people than "Freiwillige Personen") names
         if other_persons:
             for person in other_persons:
                 cur.execute('INSERT INTO history_data (person_type, history_id, non_elected_name)'
@@ -253,7 +253,7 @@ def users():
         Show all persons
     """
 
-    if not session.get("user_type") == "Admin":
+    if session.get("user_type") == "Admin":
         return redirect("/a_create_user")
 
     # Query users
@@ -613,7 +613,6 @@ def delete_user():
     user_id = request.form.get("user_id")
 
     cur = db.connection.cursor()
-    cur.execute('UPDATE users SET reset = 1 WHERE id = %s', [user_id])
     cur.execute('DELETE FROM users WHERE id = %s', [user_id])
     db.connection.commit()
     cur.close()

@@ -49,7 +49,7 @@
                                       class="flex-column d-flex mb-1">
                                         <input type='hidden' name="user_id" value="{{ user[0] }}">
                                         <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen" class="btn btn-danger"
-                                        onclick="deactivate({{ user[0] }})">
+                                        onclick="deactivate('{{ user[0] }}')">
                                     </form>
                                  {% endif %}
                                 {% if user[4] == 0 %}
