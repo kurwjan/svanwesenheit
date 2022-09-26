@@ -165,7 +165,7 @@ def a_index():
             cur.execute('INSERT INTO history (cancelled, date) VALUES (1, %s)', [datetime.today().strftime('%Y-%m-%d')])
             db.connection.commit()
             cur.close()
-            return render_template("/admin/edit-today.html", status=1)
+            return redirect("/a_history")
 
         # Query users
         cur = db.connection.cursor()
