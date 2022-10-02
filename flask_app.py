@@ -57,9 +57,11 @@ def login():
             # Update password in database
             cur = db.connection.cursor()
             cur.execute('UPDATE users SET hash = %s, reset = 0 WHERE id = %s',
-                        (generate_password_hash(request.form.get("confirmation")), session["user_id"]))
+                        (generate_password_hash(request.form.get("confirmation")), request.form.get("first_login")))
             db.connection.commit()
             cur.close()
+
+            session["user_id"] = request.form.get("first_login")
 
             # Redirect to main page
             return redirect("/a")
@@ -74,7 +76,7 @@ def login():
 
         # Query database for username
         cur = db.connection.cursor()
-        cur.execute('SELECT * FROM users WHERE username = %s', [username])
+        cur.execute('SELECT * FROM users WHERE username = %s AND deleted = 0', [username])
         row = cur.fetchone()
         cur.close()
 
@@ -85,9 +87,8 @@ def login():
 
         # Check if user is newly created
         if row[7] == 1:
-            session["user_id"] = row[0]
             session["user_type"] = row[3]
-            return render_template("first-login.html")
+            return render_template("first-login.html", user_id=row[0])
 
         # Ensure password was submitted
         if not password:
@@ -95,11 +96,11 @@ def login():
             return render_template("login.html")
 
         # Ensure password is correct
-        if not check_password_hash(row[2], password):
+        if not check_password_hash(row[1], password):
             flash("Falscher Benutzername oder ungültiges Passwort!")
             return render_template("login.html")
 
-        if row[4] == 1:
+        if row[6] == 1:
             flash("Dein Konto wurde geblockt!")
             return render_template("login.html")
 
@@ -190,9 +191,6 @@ def a_index():
         non_elected_persons = request.form.getlist("non_name")
         other_persons = request.form.getlist("other_name")
 
-        # Create new day in database.
-        cur.execute('INSERT INTO history (cancelled, date) VALUES (0, %s)', [datetime.today().strftime('%Y-%m-%d')])
-
         db.connection.commit()
 
         # Get id of current SV day.
@@ -202,32 +200,28 @@ def a_index():
 
         # Create new history log in history_data table with users status, reason (If "Entschuldigt").
         for person in persons:
-
-            # Get username of current person
-            cur.execute('SELECT username FROM users WHERE id = %s', [person[0]])
-            username = cur.fetchone()
-
             # If user has a reason, submit it to table.
             if len(person) == 3:
-                cur.execute('INSERT INTO history_data (person_type, history_id, username, user_id, status, reason)'
-                            ' VALUES (%s, %s, %s, %s, %s, %s)',
-                            ["elected", history_id, username[0], person[0], person[1], person[2]])
+                cur.execute('INSERT INTO history (date, type, user_id, status, reason)'
+                            ' VALUES (%s, %s, %s, %s, %s)',
+                            [datetime.today().strftime('%Y-%m-%d'), "elected", person[0], person[1], person[2]])
             else:
                 cur.execute(
-                    'INSERT INTO history_data (person_type, history_id, username, user_id, status)'
-                    ' VALUES (%s, %s, %s, %s, %s)', ["elected", history_id, username[0], person[0], person[1]])
+                    'INSERT INTO history (date, type, user_id, status)'
+                    ' VALUES (%s, %s, %s, %s)',
+                    [datetime.today().strftime('%Y-%m-%d'), "elected", person[0], person[1]])
 
         # Create new history log with non-elected person ("Freiwillige Personen") names
         if non_elected_persons:
             for person in non_elected_persons:
-                cur.execute('INSERT INTO history_data (person_type, history_id, non_elected_name)'
-                            ' VALUES (%s, %s, %s)', ["not_elected", history_id, person])
+                cur.execute('INSERT INTO history (date, type, other_name)'
+                            ' VALUES (%s, %s, %s)', [datetime.today().strftime('%Y-%m-%d'), "not_elected", person])
 
         # Create new history log with other person (other people than "Freiwillige Personen") names
         if other_persons:
             for person in other_persons:
-                cur.execute('INSERT INTO history_data (person_type, history_id, non_elected_name)'
-                            ' VALUES (%s, %s, %s)', ["other_person", history_id, person])
+                cur.execute('INSERT INTO history (date, type, other_name)'
+                            ' VALUES (%s, %s, %s)', [datetime.today().strftime('%Y-%m-%d'), "other_person", person])
 
         db.connection.commit()
         cur.close()
@@ -269,15 +263,15 @@ def users():
     status = []
     for user_id in ids:
         row = []
-        cur.execute('SELECT COUNT(status) FROM history_data WHERE user_id = %s AND status = %s', [user_id, "Anwesend"])
+        cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s', [user_id, "Anwesend"])
         anwesend = cur.fetchone()
         row.append(anwesend)
 
-        cur.execute('SELECT COUNT(status) FROM history_data WHERE user_id = %s AND status = %s', [user_id, "Fehlend"])
+        cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s', [user_id, "Fehlend"])
         fehlend = cur.fetchone()
         row.append(fehlend)
 
-        cur.execute('SELECT COUNT(status) FROM history_data WHERE user_id = %s AND status = %s',
+        cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s',
                     [user_id, "Entschuldigt"])
         entschuldigt = cur.fetchone()
 
@@ -285,15 +279,15 @@ def users():
         status.append(row)
 
     # Count non-elected ("Freiwillige Personen") names
-    cur.execute('SELECT DISTINCT(non_elected_name), COUNT(non_elected_name) '
-                'FROM history_data WHERE person_type = %s '
-                'GROUP BY non_elected_name', ["not_elected"])
-    not_elected_persons = cur.fetchall()
+    cur.execute('SELECT DISTINCT(other_name), COUNT(other_name) '
+                'FROM history WHERE type = %s '
+                'GROUP BY other_name', ["not_elected"])
+    other_persons = cur.fetchall()
 
     cur.close()
 
     return render_template("/normal/users.html", users=rows, status=status,
-                           not_elected_persons=not_elected_persons)
+                           not_elected_persons=other_persons)
 
 
 @app.route("/a_create_user", methods=["GET", "POST"])
@@ -314,9 +308,9 @@ def admin_create_user():
 
         # Create new user in database
         cur = db.connection.cursor()
-        cur.execute('INSERT INTO users (username, hash, type, blocked, notice, office, reset) '
-                    'VALUES (%s, %s, %s, 0, %s, %s, 1)',
-                    (username, "PASSWORD", usertype, notice, office))
+        cur.execute('INSERT INTO users (hash, username, type, office, notice) '
+                    'VALUES (%s, %s, %s, %s, %s)',
+                    (username, "PASSWORD", usertype, office, notice))
         db.connection.commit()
         cur.close()
 
@@ -328,24 +322,24 @@ def admin_create_user():
         rows = cur.fetchall()
 
         # Get an id from all users
-        cur.execute('SELECT id FROM users ORDER BY id ASC')
+        cur.execute('SELECT id FROM users ORDER BY id')
         ids = cur.fetchall()
 
         # Count their status ("Anwesend", "Fehlend", "Entschuldigt")
         status = []
         for user_id in ids:
             row = []
-            cur.execute('SELECT COUNT(status) FROM history_data WHERE user_id = %s AND status = %s',
+            cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s',
                         [user_id, "Anwesend"])
             anwesend = cur.fetchone()
             row.append(anwesend)
 
-            cur.execute('SELECT COUNT(status) FROM history_data WHERE user_id = %s AND status = %s',
+            cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s',
                         [user_id, "Fehlend"])
             fehlend = cur.fetchone()
             row.append(fehlend)
 
-            cur.execute('SELECT COUNT(status)  FROM history_data WHERE user_id = %s AND status = %s',
+            cur.execute('SELECT COUNT(status)  FROM history WHERE user_id = %s AND status = %s',
                         [user_id, "Entschuldigt"])
             entschuldigt = cur.fetchone()
 
@@ -353,9 +347,9 @@ def admin_create_user():
             status.append(row)
 
         # Count non-elected ("Freiwillige Personen") names
-        cur.execute('SELECT DISTINCT(non_elected_name), COUNT(non_elected_name) '
-                    'FROM history_data WHERE person_type = %s '
-                    'GROUP BY non_elected_name', ["not_elected"])
+        cur.execute('SELECT DISTINCT(other_name), COUNT(other_name) '
+                    'FROM history WHERE type = %s '
+                    'GROUP BY other_name', ["not_elected"])
         not_elected_persons = cur.fetchall()
 
         cur.close()
@@ -378,27 +372,27 @@ def history():
     # Set strftime to german
     locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
 
-    history_id = request.args.get("history_id")
+    history_date = request.args.get("history_date")
 
     cur = db.connection.cursor()
 
     # If history id is not given
-    if not history_id:
+    if not history_date:
         # Get latest sv session
-        cur.execute('SELECT * FROM history ORDER BY id DESC LIMIT 1')
+        cur.execute('SELECT date, cancelled FROM history ORDER BY id DESC LIMIT 1')
         history = cur.fetchone()
 
         # If there is no sv session
         if not history:
             return render_template("/normal/history.html", status=1)
     else:
-        cur.execute('SELECT id, date, cancelled FROM history WHERE id = %s', [history_id])
+        cur.execute('SELECT date, cancelled FROM history WHERE date = %s', [history_date])
         history = cur.fetchone()
 
         # If there is no sv session
         if not history:
             # Get latest sv session
-            cur.execute('SELECT * FROM history ORDER BY id DESC LIMIT 1')
+            cur.execute('SELECT date, cancelled FROM history ORDER BY id DESC LIMIT 1')
             history = cur.fetchone()
 
             # If there is no sv session
@@ -406,11 +400,27 @@ def history():
                 return render_template("/normal/history.html", status=1)
 
     # If sv session is cancelled
-    if history[2] == 1:
+    if history[1] == 1:
         # Get data for top bar
-        current_day = history[1]
-        last_day = history[0] - 1
-        next_day = history[0] + 1
+        current_day = history[0]
+
+        cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
+                    [history[0]])
+        last_day_query = cur.fetchone()
+
+        if last_day_query:
+            last_day = last_day_query[0].strftime('%Y-%m-%d')
+        else:
+            last_day = history[0]
+
+        cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
+                    [history[0]])
+        next_day_query = cur.fetchone()
+
+        if next_day_query:
+            next_day = next_day_query[0].strftime('%Y-%m-%d')
+        else:
+            next_day = history[0]
 
         return render_template("/normal/history.html", status=0,
                                current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
@@ -418,31 +428,47 @@ def history():
 
     # Get all elected persons
     cur.execute(
-        "SELECT user_id, username, status, reason FROM history_data WHERE person_type = 'elected' AND history_id = %s",
+        "SELECT user_id, status, reason FROM history WHERE type = 'elected' AND date = %s",
         [history[0]])
     persons = cur.fetchall()
 
     # Get all voluntary persons
-    cur.execute("SELECT non_elected_name FROM history_data WHERE person_type = 'not_elected' AND history_id = %s",
+    cur.execute("SELECT other_name FROM history WHERE type = 'not_elected' AND date = %s",
                 [history[0]])
     not_elected_persons = cur.fetchall()
 
     # Get all other persons
-    cur.execute("SELECT non_elected_name FROM history_data WHERE person_type = 'other_person' AND history_id = %s",
+    cur.execute("SELECT other_name FROM history WHERE type = 'other_person' AND date = %s",
                 [history[0]])
     other_persons = cur.fetchall()
 
     # Get data for top bar
-    current_day = history[1]
-    last_day = history[0] - 1
-    next_day = history[0] + 1
+    current_day = history[0]
+
+    cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
+                [history[0]])
+    last_day_query = cur.fetchone()
+
+    if last_day_query:
+        last_day = last_day_query[0].strftime('%Y-%m-%d')
+    else:
+        last_day = history[0]
+
+    cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
+                [history[0]])
+    next_day_query = cur.fetchone()
+
+    if next_day_query:
+        next_day = next_day_query[0].strftime('%Y-%m-%d')
+    else:
+        next_day = history[0]
 
     cur.close()
 
     return render_template("/normal/history.html", status=2, not_elected_persons=not_elected_persons,
                            other_persons=other_persons, persons=persons,
                            current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
-                           history_id=history[0])
+                           history_date=history[0])
 
 
 @app.route("/a_change_history", methods=["POST"])
@@ -459,7 +485,7 @@ def change_history():
     cur = db.connection.cursor()
 
     # Get all persons from given session
-    cur.execute('SELECT user_id FROM history_data WHERE person_type = %s AND history_id = %s',
+    cur.execute('SELECT user_id FROM history WHERE type = %s AND date = %s',
                 ["elected", history_id])
     persons = cur.fetchall()
 
@@ -470,11 +496,11 @@ def change_history():
         if status == "Entschuldigt":
             reason = request.form.get("reason-" + str(person[0]))
 
-            cur.execute('UPDATE history_data SET status = %s, reason = %s WHERE user_id = %s AND history_id = %s',
+            cur.execute('UPDATE history SET status = %s, reason = %s WHERE user_id = %s AND date = %s',
                         [status, reason, person[0], history_id])
 
         else:
-            cur.execute('UPDATE history_data SET status = %s, reason = NULL WHERE user_id = %s AND history_id = %s',
+            cur.execute('UPDATE history SET status = %s, reason = NULL WHERE user_id = %s AND date = %s',
                         [status, person[0], history_id])
 
     db.connection.commit()
@@ -495,27 +521,27 @@ def admin_history():
     # Set strftime to german
     locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
 
-    history_id = request.args.get("history_id")
+    history_date = request.args.get("history_date")
 
     cur = db.connection.cursor()
 
     # If history id is not given
-    if not history_id:
+    if not history_date:
         # Get latest sv session
-        cur.execute('SELECT * FROM history ORDER BY id DESC LIMIT 1')
+        cur.execute('SELECT date, cancelled FROM history ORDER BY id DESC LIMIT 1')
         history = cur.fetchone()
 
         # If there is no sv session
         if not history:
             return render_template("/admin/admin-history.html", status=1)
     else:
-        cur.execute('SELECT id, date, cancelled FROM history WHERE id = %s', [history_id])
+        cur.execute('SELECT date, cancelled FROM history WHERE date = %s', [history_date])
         history = cur.fetchone()
 
         # If there is no sv session
         if not history:
             # Get latest sv session
-            cur.execute('SELECT * FROM history ORDER BY id DESC LIMIT 1')
+            cur.execute('SELECT date, cancelled FROM history ORDER BY id DESC LIMIT 1')
             history = cur.fetchone()
 
             # If there is no sv session
@@ -523,11 +549,27 @@ def admin_history():
                 return render_template("/admin/admin-history.html", status=1)
 
     # If sv session is cancelled
-    if history[2] == 1:
+    if history[1] == 1:
         # Get data for top bar
-        current_day = history[1]
-        last_day = history[0] - 1
-        next_day = history[0] + 1
+        current_day = history[0]
+
+        cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
+                    [history[0]])
+        last_day_query = cur.fetchone()
+
+        if last_day_query:
+            last_day = last_day_query[0].strftime('%Y-%m-%d')
+        else:
+            last_day = history[0]
+
+        cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
+                    [history[0]])
+        next_day_query = cur.fetchone()
+
+        if next_day_query:
+            next_day = next_day_query[0].strftime('%Y-%m-%d')
+        else:
+            next_day = history[0]
 
         return render_template("/admin/admin-history.html", status=0,
                                current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
@@ -535,24 +577,40 @@ def admin_history():
 
     # Get all elected persons
     cur.execute(
-        "SELECT user_id, username, status, reason FROM history_data WHERE person_type = 'elected' AND history_id = %s",
+        "SELECT user_id, status, reason FROM history WHERE type = 'elected' AND date = %s",
         [history[0]])
     persons = cur.fetchall()
 
     # Get all voluntary persons
-    cur.execute("SELECT non_elected_name FROM history_data WHERE person_type = 'not_elected' AND history_id = %s",
+    cur.execute("SELECT other_name FROM history WHERE type = 'not_elected' AND date = %s",
                 [history[0]])
     not_elected_persons = cur.fetchall()
 
     # Get all other persons
-    cur.execute("SELECT non_elected_name FROM history_data WHERE person_type = 'other_person' AND history_id = %s",
+    cur.execute("SELECT other_name FROM history WHERE type = 'other_person' AND date = %s",
                 [history[0]])
     other_persons = cur.fetchall()
 
     # Get data for top bar
-    current_day = history[1]
-    last_day = history[0] - 1
-    next_day = history[0] + 1
+    current_day = history[0]
+
+    cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
+                [history[0]])
+    last_day_query = cur.fetchone()
+
+    if last_day_query:
+        last_day = last_day_query[0].strftime('%Y-%m-%d')
+    else:
+        last_day = history[0]
+
+    cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
+                [history[0]])
+    next_day_query = cur.fetchone()
+
+    if next_day_query:
+        next_day = next_day_query[0].strftime('%Y-%m-%d')
+    else:
+        next_day = history[0]
 
     cur.close()
 
@@ -577,7 +635,7 @@ def user_history():
 
     # Select ids and dates from history table in descending order and set date names to german.
     cur.execute('SET lc_time_names = "de_DE"')
-    cur.execute('SELECT id, DATE_FORMAT(date, %s) FROM history ORDER BY date DESC', ["%W, %e.%c.%y"])
+    cur.execute('SELECT date FROM history GROUP BY date ORDER BY date DESC', ["%W, %e.%c.%y"])
     dates = cur.fetchall()
 
     # Go through each date from the dates list to add user's history from each date.
@@ -586,8 +644,8 @@ def user_history():
         row = []
 
         # Select information about the SV day from the current date.
-        cur.execute('SELECT status, reason FROM history_data '
-                    'WHERE history_id = %s AND user_id = %s',
+        cur.execute('SELECT status, reason FROM history '
+                    'WHERE date = %s AND user_id = %s',
                     [date[0], user_id])
         query = cur.fetchone()
 
@@ -643,7 +701,7 @@ def block_user():
     user_id = request.form.get("user_id")
 
     cur = db.connection.cursor()
-    cur.execute('UPDATE users SET blocked = 1 WHERE id = %s', [user_id])
+    cur.execute('UPDATE users SET block = 1 WHERE id = %s', [user_id])
     db.connection.commit()
     cur.close()
 
@@ -658,7 +716,7 @@ def unblock_user():
     user_id = request.form.get("user_id")
 
     cur = db.connection.cursor()
-    cur.execute('UPDATE users SET blocked = 0 WHERE id = %s', [user_id])
+    cur.execute('UPDATE users SET block = 0 WHERE id = %s', [user_id])
     db.connection.commit()
     cur.close()
 
