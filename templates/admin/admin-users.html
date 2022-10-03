@@ -14,9 +14,9 @@
                 {% if user[3] == 'Admin' %}
                     <div class="col" id="{{ user[0] }}">
                         <div class="card border-danger mb-3">
-                            <div class="card-header text-black">{{ user[6] }}</div>
+                            <div class="card-header text-black">{{ user[4] }}</div>
                             <div class="card-body flex-column d-flex text-danger">
-                                <h5 class="card-title">{{ user[1] }}</h5>
+                                <h5 class="card-title">{{ user[2] }}</h5>
                                 <p class="card-text">{{ user[5] }}</p>
                                 <div class="table-responsive">
                                     <table class="table table-borderless table-hover">
@@ -52,7 +52,7 @@
                                         onclick="deactivate('{{ user[0] }}'); submit();">
                                     </form>
                                  {% endif %}
-                                {% if user[4] == 0 %}
+                                {% if user[6] == 0 %}
                                     <form id="block-{{ user[0] }}" action="/block_user" method="post"
                                           class="flex-column d-flex mb-1" style="display: flex !important;">
                                         <input type='hidden' name="user_id" value="{{ user[0] }}">
@@ -92,9 +92,9 @@
                 {% elif user[3] == 'Bearbeiter' %}
                     <div class="col" id="{{ user[0] }}">
                         <div class="card border-primary mb-3">
-                            <div class="card-header text-black">{{ user[6] }}</div>
+                            <div class="card-header text-black">{{ user[4] }}</div>
                             <div class="card-body flex-column d-flex text-primary">
-                                <h5 class="card-title">{{ user[1] }}</h5>
+                                <h5 class="card-title">{{ user[2] }}</h5>
                                 <p class="card-text">{{ user[5] }}</p>
                                 <div class="table-responsive">
                                     <table class="table table-borderless table-hover">
@@ -130,7 +130,7 @@
                                         onclick="deactivate('{{ user[0] }}'); submit();">
                                     </form>
                                  {% endif %}
-                                {% if user[4] == 0 %}
+                                {% if user[6] == 0 %}
                                     <form id="block-{{ user[0] }}" action="/block_user" method="post"
                                           class="flex-column d-flex mb-1" style="display: flex !important;">
                                         <input type='hidden' name="user_id" value="{{ user[0] }}">
@@ -170,9 +170,9 @@
                 {% else %}
                     <div class="col" id="{{ user[0] }}">
                         <div class="card border-secondary mb-3">
-                            <div class="card-header text-black">{{ user[6] }}</div>
+                            <div class="card-header text-black">{{ user[4] }}</div>
                             <div class="card-body flex-column d-flex text-secondary">
-                                <h5 class="card-title">{{ user[1] }}</h5>
+                                <h5 class="card-title">{{ user[2] }}</h5>
                                 <p class="card-text">{{ user[5] }}</p>
                                 <div class="table-responsive">
                                     <table class="table table-borderless table-hover">
@@ -208,7 +208,7 @@
                                         onclick="deactivate('{{ user[0] }}'); submit();">
                                     </form>
                                  {% endif %}
-                                {% if user[4] == 0 %}
+                                {% if user[6] == 0 %}
                                     <form id="block-{{ user[0] }}" action="/block_user" method="post"
                                           class="flex-column d-flex mb-1" style="display: flex !important;">
                                         <input type='hidden' name="user_id" value="{{ user[0] }}">
