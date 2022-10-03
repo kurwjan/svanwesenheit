@@ -4,7 +4,9 @@ from flask_mysqldb import MySQL
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_session import Session
 from datetime import datetime
+
 from decorated_functions import login_required, editor_required, admin_required
+from helpers import history_get_dates
 
 app = Flask(__name__)
 
@@ -193,11 +195,6 @@ def a_index():
 
         db.connection.commit()
 
-        # Get id of current SV day.
-        cur.execute('SELECT id FROM history WHERE date = %s', [datetime.today().strftime('%Y-%m-%d')])
-
-        history_id = cur.fetchone()
-
         # Create new history log in history_data table with users status, reason (If "Entschuldigt").
         for person in persons:
             # If user has a reason, submit it to table.
@@ -237,7 +234,7 @@ def a_index():
         if not check:
             return render_template("/admin/edit-today.html", status=0)
         else:
-            return redirect("/a_history")
+            return redirect("/history")
 
 
 @app.route("/users")
@@ -310,7 +307,7 @@ def admin_create_user():
         cur = db.connection.cursor()
         cur.execute('INSERT INTO users (hash, username, type, office, notice) '
                     'VALUES (%s, %s, %s, %s, %s)',
-                    (username, "PASSWORD", usertype, office, notice))
+                    ("PASSWORD", username, usertype, office, notice))
         db.connection.commit()
         cur.close()
 
@@ -318,11 +315,11 @@ def admin_create_user():
     else:
         # Query users
         cur = db.connection.cursor()
-        cur.execute('SELECT * FROM users')
+        cur.execute('SELECT * FROM users WHERE deleted = 0')
         rows = cur.fetchall()
 
         # Get an id from all users
-        cur.execute('SELECT id FROM users ORDER BY id')
+        cur.execute('SELECT id FROM users WHERE deleted = 0 ORDER BY id')
         ids = cur.fetchall()
 
         # Count their status ("Anwesend", "Fehlend", "Entschuldigt")
@@ -365,14 +362,10 @@ def history():
         Shows all past sv sessions.
     """
 
-    # If user has higher privileges, redirect
-    if not session.get("user_type") == "Normal":
-        return redirect("/a_history")
-
     # Set strftime to german
     locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
 
-    history_date = request.args.get("history_date")
+    history_date = request.args.get("date")
 
     cur = db.connection.cursor()
 
@@ -384,6 +377,8 @@ def history():
 
         # If there is no sv session
         if not history:
+            if not session.get("user_type") == "Normal":
+                return render_template("/admin/admin-history.html", status=1)
             return render_template("/normal/history.html", status=1)
     else:
         cur.execute('SELECT date, cancelled FROM history WHERE date = %s', [history_date])
@@ -397,31 +392,20 @@ def history():
 
             # If there is no sv session
             if not history:
+                if not session.get("user_type") == "Normal":
+                    return render_template("/admin/admin-history.html", status=1)
                 return render_template("/normal/history.html", status=1)
 
     # If sv session is cancelled
     if history[1] == 1:
+
         # Get data for top bar
-        current_day = history[0]
+        current_day, last_day, next_day = history_get_dates(history)
 
-        cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
-                    [history[0]])
-        last_day_query = cur.fetchone()
-
-        if last_day_query:
-            last_day = last_day_query[0].strftime('%Y-%m-%d')
-        else:
-            last_day = history[0]
-
-        cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
-                    [history[0]])
-        next_day_query = cur.fetchone()
-
-        if next_day_query:
-            next_day = next_day_query[0].strftime('%Y-%m-%d')
-        else:
-            next_day = history[0]
-
+        if not session.get("user_type") == "Normal":
+            return render_template("/admin/admin-history.html", status=0,
+                                   current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
+                                   last_day=last_day)
         return render_template("/normal/history.html", status=0,
                                current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
                                last_day=last_day)
@@ -430,7 +414,19 @@ def history():
     cur.execute(
         "SELECT user_id, status, reason FROM history WHERE type = 'elected' AND date = %s",
         [history[0]])
-    persons = cur.fetchall()
+    persons_query = cur.fetchall()
+
+    # Appends each person in person_query with its name and office
+    persons = []
+    for person in persons_query:
+        row = [person[0], person[1], person[2]]
+
+        cur.execute("SELECT username, office FROM users WHERE id = %s", [person[0]])
+        username = cur.fetchone()
+
+        row.append(username[0])
+        row.append(username[1])
+        persons.append(row)
 
     # Get all voluntary persons
     cur.execute("SELECT other_name FROM history WHERE type = 'not_elected' AND date = %s",
@@ -442,29 +438,16 @@ def history():
                 [history[0]])
     other_persons = cur.fetchall()
 
-    # Get data for top bar
-    current_day = history[0]
-
-    cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
-                [history[0]])
-    last_day_query = cur.fetchone()
-
-    if last_day_query:
-        last_day = last_day_query[0].strftime('%Y-%m-%d')
-    else:
-        last_day = history[0]
-
-    cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
-                [history[0]])
-    next_day_query = cur.fetchone()
-
-    if next_day_query:
-        next_day = next_day_query[0].strftime('%Y-%m-%d')
-    else:
-        next_day = history[0]
-
     cur.close()
 
+    # Get data for top bar
+    current_day, last_day, next_day = history_get_dates(history)
+
+    if not session.get("user_type") == "Normal":
+        return render_template("/admin/admin-history.html", status=2, not_elected_persons=not_elected_persons,
+                               other_persons=other_persons, persons=persons,
+                               current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
+                               history_date=history[0])
     return render_template("/normal/history.html", status=2, not_elected_persons=not_elected_persons,
                            other_persons=other_persons, persons=persons,
                            current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
@@ -480,13 +463,13 @@ def change_history():
         Shows all past sv sessions.
     """
 
-    history_id = request.form.get("history_id")
+    history_date = request.form.get("history_date")
 
     cur = db.connection.cursor()
 
     # Get all persons from given session
     cur.execute('SELECT user_id FROM history WHERE type = %s AND date = %s',
-                ["elected", history_id])
+                ["elected", history_date])
     persons = cur.fetchall()
 
     # Edit given session
@@ -497,127 +480,15 @@ def change_history():
             reason = request.form.get("reason-" + str(person[0]))
 
             cur.execute('UPDATE history SET status = %s, reason = %s WHERE user_id = %s AND date = %s',
-                        [status, reason, person[0], history_id])
+                        [status, reason, person[0], history_date])
 
         else:
             cur.execute('UPDATE history SET status = %s, reason = NULL WHERE user_id = %s AND date = %s',
-                        [status, person[0], history_id])
+                        [status, person[0], history_date])
 
     db.connection.commit()
 
     return redirect("/a_history")
-
-
-@app.route("/a_history")
-@login_required
-@editor_required
-def admin_history():
-    """
-        ADMIN OR EDITOR REQUIRED
-
-        Shows all past sv sessions.
-    """
-
-    # Set strftime to german
-    locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
-
-    history_date = request.args.get("history_date")
-
-    cur = db.connection.cursor()
-
-    # If history id is not given
-    if not history_date:
-        # Get latest sv session
-        cur.execute('SELECT date, cancelled FROM history ORDER BY id DESC LIMIT 1')
-        history = cur.fetchone()
-
-        # If there is no sv session
-        if not history:
-            return render_template("/admin/admin-history.html", status=1)
-    else:
-        cur.execute('SELECT date, cancelled FROM history WHERE date = %s', [history_date])
-        history = cur.fetchone()
-
-        # If there is no sv session
-        if not history:
-            # Get latest sv session
-            cur.execute('SELECT date, cancelled FROM history ORDER BY id DESC LIMIT 1')
-            history = cur.fetchone()
-
-            # If there is no sv session
-            if not history:
-                return render_template("/admin/admin-history.html", status=1)
-
-    # If sv session is cancelled
-    if history[1] == 1:
-        # Get data for top bar
-        current_day = history[0]
-
-        cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
-                    [history[0]])
-        last_day_query = cur.fetchone()
-
-        if last_day_query:
-            last_day = last_day_query[0].strftime('%Y-%m-%d')
-        else:
-            last_day = history[0]
-
-        cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
-                    [history[0]])
-        next_day_query = cur.fetchone()
-
-        if next_day_query:
-            next_day = next_day_query[0].strftime('%Y-%m-%d')
-        else:
-            next_day = history[0]
-
-        return render_template("/admin/admin-history.html", status=0,
-                               current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
-                               last_day=last_day)
-
-    # Get all elected persons
-    cur.execute(
-        "SELECT user_id, status, reason FROM history WHERE type = 'elected' AND date = %s",
-        [history[0]])
-    persons = cur.fetchall()
-
-    # Get all voluntary persons
-    cur.execute("SELECT other_name FROM history WHERE type = 'not_elected' AND date = %s",
-                [history[0]])
-    not_elected_persons = cur.fetchall()
-
-    # Get all other persons
-    cur.execute("SELECT other_name FROM history WHERE type = 'other_person' AND date = %s",
-                [history[0]])
-    other_persons = cur.fetchall()
-
-    # Get data for top bar
-    current_day = history[0]
-
-    cur.execute("SELECT date FROM history WHERE date < %s GROUP BY date ORDER BY date DESC LIMIT 1",
-                [history[0]])
-    last_day_query = cur.fetchone()
-
-    if last_day_query:
-        last_day = last_day_query[0].strftime('%Y-%m-%d')
-    else:
-        last_day = history[0]
-
-    cur.execute("SELECT date FROM history WHERE date > %s GROUP BY date ORDER BY date LIMIT 1",
-                [history[0]])
-    next_day_query = cur.fetchone()
-
-    if next_day_query:
-        next_day = next_day_query[0].strftime('%Y-%m-%d')
-    else:
-        next_day = history[0]
-
-    cur.close()
-
-    return render_template("/admin/admin-history.html", status=2, not_elected_persons=not_elected_persons,
-                           other_persons=other_persons, persons=persons,
-                           current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
-                           history_id=history[0])
 
 
 @app.route("/user_history", methods=["POST"])
@@ -635,7 +506,7 @@ def user_history():
 
     # Select ids and dates from history table in descending order and set date names to german.
     cur.execute('SET lc_time_names = "de_DE"')
-    cur.execute('SELECT date FROM history GROUP BY date ORDER BY date DESC', ["%W, %e.%c.%y"])
+    cur.execute('SELECT date FROM history GROUP BY date ORDER BY date DESC')
     dates = cur.fetchall()
 
     # Go through each date from the dates list to add user's history from each date.
@@ -654,7 +525,7 @@ def user_history():
             break
 
         # Summarize the information and append it to history list
-        row.append(date[1])
+        row.append(date[0].strftime('%-d.%-m.%Y'))
         row.append(query)
         history.append(row)
 
@@ -671,7 +542,7 @@ def delete_user():
     user_id = request.form.get("user_id")
 
     cur = db.connection.cursor()
-    cur.execute('DELETE FROM users WHERE id = %s', [user_id])
+    cur.execute('UPDATE users SET deleted = 1 WHERE id = %s', [user_id])
     db.connection.commit()
     cur.close()
 

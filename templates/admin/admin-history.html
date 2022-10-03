@@ -11,7 +11,7 @@
             <div class="container d-sm-block">
                 <div class="justify-content-center text-center text-white" style="display: flex;">
                     <form>
-                        <input type="hidden" name="history_date" value="{{ last_day }}">
+                        <input type="hidden" name="date" value="{{ last_day }}">
                         <button type="submit" class="text-white btn btn-default me-2">
                             <i class="fa-solid fa-arrow-left-long"></i>
                         </button>
@@ -20,7 +20,7 @@
                         {{ current_day }}
                     </h5>
                     <form>
-                        <input type="hidden" name="history_date" value="{{ next_day }}">
+                        <input type="hidden" name="date" value="{{ next_day }}">
                         <button type="submit" class="text-white btn btn-default ms-2">
                             <i class="fa-solid fa-arrow-right-long"></i>
                         </button>
@@ -70,7 +70,7 @@
                         <div class="col">
                             <div class="card h-100">
                                 <div class="card-body text-dark">
-                                    <h5 class="card-title">{{ person[1] }}</h5>
+                                    <h5 class="card-title">{{ person[3] }}</h5>
                                     <div class="input-group mb-1">
                                         <input class="me-1" type="radio" name="{{ person[0] }}"
                                                 {% if person[1] == 'Anwesend' %} checked {% endif %}
@@ -105,6 +105,7 @@
                                                                                     placeholder="Grund"
                                                                                     id="entschuldigt-{{ person[0] }}-textbox">
                                 </div>
+                                <div class="card-footer text-muted small-index">{{ person[4] }}</div>
                             </div>
                         </div>
                     {% endfor %}
@@ -146,7 +147,7 @@
                     </div>
                 </div>
             </div>
-            <input type="hidden" form="today_form" name="history_date" value="{{ history_date }}">
+            <input type="hidden" form="today_form" name="date" value="{{ date }}">
             <input class="btn btn-primary mt-3 mb-4" form="today_form" type="submit" formaction="/a_change_history" value="Ändern">
         {% endif %}
     </div>
