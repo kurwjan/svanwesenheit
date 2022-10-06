@@ -34,7 +34,7 @@
 
 
 {% block main %}
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mb-4">
         {% if status == 0 %}
             <!-- cancelled -->
             <div class="col-md-8 col-sm-12 col-12">
@@ -70,23 +70,24 @@
                         <div class="col">
                             <div class="card h-100">
                                 <div class="card-body text-dark">
-                                    <h5 class="card-title">{{ person[1] }}</h5>
-                                    {% if person[2] == 'Anwesend' %}
+                                    <h5 class="card-title">{{ person[3] }}</h5>
+                                    {% if person[1] == 'Anwesend' %}
                                         <p class="fw-bold">Anwesend</p>
-                                    {% elif person[2] == 'Fehlend' %}
+                                    {% elif person[1] == 'Fehlend' %}
                                         <p class="fw-bold">Fehlend</p>
                                     {% else %}
-                                        <p class="fw-bold">Entschuldigt</p>
-                                        <p>{{ person[3] }}</p>
+                                        <p class="fw-bold mb-1">Entschuldigt</p>
+                                        <p>{{ person[2] }}</p>
                                     {% endif %}
                                 </div>
+                                <div class="card-footer text-muted small-index">{{ person[4] }}</div>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
                 <!-- non elected positions-->
                 <div class="card" style="margin-top: 1rem">
-                    <div class="card-header" style="background-color: #337ab7">
+                    <div class="card-header header-lanis-color">
                         <i class="fa-solid fa-person me-1"></i>
                         Freiwillige Personen
                     </div>
@@ -104,7 +105,7 @@
                 </div>
                 <!-- other persons-->
                 <div class="card mb-4" style="margin-top: 1rem">
-                    <div class="card-header" style="background-color: #337ab7">
+                    <div class="card-header header-lanis-color">
                         <i class="fa-solid fa-person-rays me-1"></i>
                         Andere Personen
                     </div>

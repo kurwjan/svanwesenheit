@@ -1,7 +1,13 @@
+// static/assets/main.scss
+// Source: https://getbootstrap.com/docs/5.2/customize/sass/#importing
+
+$primary: #337ab7;
+$font-family-sans-serif:  "Noto Sans", Arial, sans-serif;
+
 /* Website background and white filter*/
 body {
     background: linear-gradient(rgba(255,255,255,0.30), rgba(255,255,255,0.30)),
-                url("../static/bg.jpg")
+                url("bg.jpg")
                 no-repeat fixed;
     background-size: cover;
 }
@@ -13,14 +19,11 @@ nav {
 
 /* Card title background color */
 .header-lanis-color {
-    background-color: #337ab7;
-}
-
-/* Button color */
-.btn-primary {
-    background-color: #337ab7;
-    --bs-btn-hover-bg: #2a5f89;
-    --bs-btn-active-bg: #0a7fbd;
+    background-color: #337ab7 !important;
+    font-family: "Open Sans", Arial, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
 }
 
 /* Expand body*/
@@ -58,3 +61,6 @@ footer a:hover {
 .small-index {
     font-size: .841em !important;
 }
+
+// Include all of Bootstrap
+@import "node_modules/bootstrap/scss/bootstrap";

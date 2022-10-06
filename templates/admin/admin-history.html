@@ -31,8 +31,6 @@
     {% endif %}
 {% endblock %}
 
-
-
 {% block main %}
     <div class="row justify-content-center">
         {% if status == 0 %}
@@ -112,7 +110,7 @@
                 </div>
                 <!-- non elected positions-->
                 <div class="card" style="margin-top: 1rem">
-                    <div class="card-header" style="background-color: #337ab7">
+                    <div class="card-header header-lanis-color">
                         <i class="fa-solid fa-person me-1"></i>
                         Freiwillige Personen
                     </div>
@@ -130,7 +128,7 @@
                 </div>
                 <!-- other persons-->
                 <div class="card mb-4" style="margin-top: 1rem">
-                    <div class="card-header" style="background-color: #337ab7">
+                    <div class="card-header header-lanis-color">
                         <i class="fa-solid fa-person-rays me-1"></i>
                         Andere Personen
                     </div>
@@ -148,7 +146,7 @@
                 </div>
             </div>
             <input type="hidden" form="today_form" name="date" value="{{ date }}">
-            <input class="btn btn-primary mt-3 mb-4" form="today_form" type="submit" formaction="/a_change_history" value="Ändern">
+            <input class="btn btn-primary mb-5" form="today_form" type="submit" formaction="/a_change_history" value="Ändern">
         {% endif %}
     </div>
 

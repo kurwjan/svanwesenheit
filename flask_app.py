@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_session import Session
 from datetime import datetime
+from flask_assets import Environment, Bundle
 
 from decorated_functions import login_required, editor_required, admin_required
 from helpers import history_get_dates
@@ -25,6 +26,17 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+assets = Environment(app)
+assets.url = app.static_url_path
+
+# Scss files
+scss = Bundle(
+    "assets/main.scss",
+    filters="libsass",
+    output="css/scss-generated.css"
+)
+assets.register("scss_all", scss)
 
 
 @app.after_request
@@ -168,7 +180,7 @@ def a_index():
             cur.execute('INSERT INTO history (cancelled, date) VALUES (1, %s)', [datetime.today().strftime('%Y-%m-%d')])
             db.connection.commit()
             cur.close()
-            return redirect("/a_history")
+            return redirect("/history")
 
         # Query users
         cur = db.connection.cursor()
@@ -488,7 +500,7 @@ def change_history():
 
     db.connection.commit()
 
-    return redirect("/a_history")
+    return redirect("/history")
 
 
 @app.route("/user_history", methods=["POST"])
@@ -505,7 +517,7 @@ def user_history():
     name = cur.fetchone()
 
     # Select ids and dates from history table in descending order and set date names to german.
-    cur.execute('SET lc_time_names = "de_DE"')
+    locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
     cur.execute('SELECT date FROM history GROUP BY date ORDER BY date DESC')
     dates = cur.fetchall()
 
@@ -517,15 +529,15 @@ def user_history():
         # Select information about the SV day from the current date.
         cur.execute('SELECT status, reason FROM history '
                     'WHERE date = %s AND user_id = %s',
-                    [date[0], user_id])
+                    [date[0].strftime('%Y-%m-%d'), user_id])
         query = cur.fetchone()
 
         # If current SV day has no information, break for loop
         if not query:
-            break
+            continue
 
         # Summarize the information and append it to history list
-        row.append(date[0].strftime('%-d.%-m.%Y'))
+        row.append(date[0].strftime('%A, %-d.%-m.%Y'))
         row.append(query)
         history.append(row)
 
