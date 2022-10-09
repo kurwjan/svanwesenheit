@@ -1,9 +1,5 @@
 {% extends "layout.html" %}
 
-{% block scripts %}
-    <script src="static/scripts/login.js"></script>
-{% endblock %}
-
 {% block main %}
     <div class="row justify-content-center">
         <div class="col-md-8 col-sm-12 col-12">
@@ -21,9 +17,22 @@
                         <div class="mb-3">
                             <label for="passwort" class="mb-1 form-fabel">Passwort</label>
                             <input type="password" class="form-control" id="password" name="password" aria-describedby="passwortHelp">
+                            <small class="text-muted">Wenn du dich zum ersten Mal anmeldest oder dein Passwort zurückgesetzt wurde, musst du kein Passwort eingeben</small>
                         </div>
                         <button type="submit" class="btn btn-primary mb-1">Fertig</button>
                     </form>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header header-lanis-color">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i>
+                    DU HAST KEIN KONTO?
+                </div>
+                <div class="card-body text-dark">
+                    <ul style="padding-left: 1rem">
+                        <li>Schau dir die <a href="/offices">Aufgaben der Ämter</a> an.</li>
+                        <li class="mt-2">Trete SV-Sitzungen am <b>Montag</b> und <b>Dienstag</b> in der <b>7. Stunde</b> bei auch ohne ein gewähltes Amt zu haben.</li>
+                    </ul>
                 </div>
             </div>
         </div>

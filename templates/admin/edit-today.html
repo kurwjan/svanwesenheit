@@ -34,7 +34,7 @@
             <!-- overview -->
             <div>
                 <!-- elected positions-->
-                <div class="row row-cols-2 row-cols-md-2 g-2">
+                <div class="row row-cols-1 row-cols-md-2 g-2">
                     {% for person in persons %}
                         <div class="col">
                             <div class="card h-100">
@@ -87,6 +87,10 @@
                         <div class="table-responsive mb-1">
                             <table class="table table-borderless table-hover" id="non_elected_table">
                                 <tbody>
+                                    <tr style="visibility: collapse;">
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -106,6 +110,10 @@
                         <div class="table-responsive mb-1">
                             <table class="table table-borderless table-hover" id="other_persons_table">
                                 <tbody>
+                                    <tr style="visibility: collapse;">
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -132,7 +140,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
-                            <button type="button" class="btn btn-primary"
+                            <button type="submit" class="btn btn-primary"
                                     onclick="add_person('non_elected_table', 'non_elected_textbox', 'non_name')">
                                 Hinzufügen
                             </button>
@@ -164,9 +172,18 @@
                     </div>
                 </div>
             </div>
-            <input class="btn btn-primary mt-3 mb-4" form="today_form" type="submit" value="Fertig">
+            <div class="row justify-content-center mt-3">
+                <input class="btn btn-primary" form="today_form" type="submit" value="Fertig">
+            </div>
+            <form class="row justify-content-center mb-1" action="/">
+                <button class="btn btn-primary mt-2 mb-4">Zurück</button>
+            </form>
         {% endif %}
     </div>
+
+    {% if cancelled_date %}
+        <input class="btn btn-primary" form="today_form" type="hidden" name="date" value="{{ cancelled_date }}">
+    {% endif %}
 
     <form id="today_form" method="post"></form>
 

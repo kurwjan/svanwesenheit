@@ -8,7 +8,7 @@
     <div class="row justify-content-center">
         <div class="row row-cols-1 row-cols-md-2 g-2">
             {% for user in users %}
-                {% if user[3] == 'Admin' %}
+                {% if user[3] == 'Bearbeiter' %}
                     <div class="col" id="{{ user[0] }}">
                         <div class="card border-danger mb-3">
                             <div class="card-header text-black">{{ user[4] }}</div>
@@ -35,10 +35,10 @@
                                     <input type="submit" value="Historie" class="btn btn-danger mb-1">
                                 </form>
                             </div>
-                            <div class="card-footer text-black">Admin</div>
+                            <div class="card-footer text-black">Bearbeiter</div>
                         </div>
                     </div>
-                {% elif user[3] == 'Bearbeiter' %}
+                {% else %}
                     <div class="col" id="{{ user[0] }}">
                         <div class="card border-primary mb-3">
                             <div class="card-header text-black">{{ user[4] }}</div>
@@ -65,37 +65,7 @@
                                     <input type="submit" value="Historie" class="btn btn-primary mb-1">
                                 </form>
                             </div>
-                            <div class="card-footer text-black">Bearbeiter</div>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="col" id="{{ user[0] }}">
-                        <div class="card border-secondary mb-3">
-                            <div class="card-header text-black">{{ user[4] }}</div>
-                            <div class="card-body flex-column d-flex text-secondary">
-                                <h5 class="card-title">{{ user[2] }}</h5>
-                                <p class="card-text">{{ user[5] }}</p>
-                                <div class="table-responsive">
-                                    <table class="table table-borderless table-hover">
-                                        <tr class="text-secondary">
-                                            <th>Anwesend</th>
-                                            <th>Fehlend</th>
-                                            <th>Entschuldigt</th>
-                                        </tr>
-                                        <tr class="text-secondary">
-                                            <td>{{ status[loop.index - 1][0][0] }}</td>
-                                            <td>{{ status[loop.index - 1][1][0] }}</td>
-                                            <td>{{ status[loop.index - 1][2][0] }}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <form id="history-{{ user[0] }}" action="/user_history" method="post"
-                                      class="flex-column d-flex mt-1">
-                                    <input type="hidden" name="user_id" value="{{ user[0] }}">
-                                    <input type="submit" value="Historie" class="btn btn-secondary mb-1">
-                                </form>
-                            </div>
-                            <div class="card-footer text-black">Normal</div>
+                            <div class="card-footer text-black">{{ user[3] }}</div>
                         </div>
                     </div>
                 {% endif %}

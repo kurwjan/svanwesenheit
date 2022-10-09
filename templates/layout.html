@@ -4,9 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, width=device-width">
 
-    <!-- Stylesheet -->
-    <link href="/static/css/stylesheet.css" rel="stylesheet">
-
     <!-- Bootstrap -->
     {% assets "scss_all" %}
         <link rel=stylesheet type=text/css href="{{ ASSET_URL }}">
@@ -22,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu">
 
     <!-- Aditional scripts -->
     {% block scripts %}{% endblock %}
@@ -47,6 +44,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="/history"><i class="fa-solid fa-clock-rotate-left me-1"></i> Historie</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/offices"><i class="fa-solid fa-person-circle-question me-1"></i> Ämter</a>
                 </li>
             </ul>
         </div>

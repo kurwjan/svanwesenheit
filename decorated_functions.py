@@ -45,7 +45,7 @@ def admin_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("user_type") != "Admin":
+        if session.get("user_type") != "Bearbeiter":
             return redirect("/")
         return f(*args, **kwargs)
 
@@ -61,7 +61,7 @@ def editor_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("user_type") == "Admin" or session.get("user_type") == "Bearbeiter":
+        if session.get("user_type") == "Bearbeiter" or session.get("user_type") == "Nutzer + Bearbeiten":
             return f(*args, **kwargs)
         return redirect("/")
 

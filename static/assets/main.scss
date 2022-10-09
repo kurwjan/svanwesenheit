@@ -2,7 +2,7 @@
 // Source: https://getbootstrap.com/docs/5.2/customize/sass/#importing
 
 $primary: #337ab7;
-$font-family-sans-serif:  "Noto Sans", Arial, sans-serif;
+$font-family-sans-serif:  "Ubuntu", Arial, sans-serif;
 
 /* Website background and white filter*/
 body {
@@ -60,6 +60,10 @@ footer a:hover {
 /*.small smaller font for index page card footers*/
 .small-index {
     font-size: .841em !important;
+}
+
+#non_elected_table td{
+    white-space: normal;
 }
 
 // Include all of Bootstrap

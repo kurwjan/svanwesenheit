@@ -9,22 +9,35 @@
                     {{ person }}
                 </div>
                 <div class="card-body">
-                    <table class="table table-borderless table-hover" id="non_elected_table">
+                    <small class="text-muted">Eine kursive Sitzung heißt, dass sie entfallen ist.</small>
+                    <table class="table table-borderless table-hover mt-2" id="non_elected_table">
                         <tr>
                             <th>Datum</th>
                             <th>Status</th>
                             <th>Grund</th>
                         </tr>
                         {% for row in history %}
-                            <tr>
-                                <td>{{ row[0] }}</td>
-                                <td>{{ row[1][0] }}</td>
-                                {% if row[1][1] != None %}
-                                    <td>{{ row[1][1] }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            </tr>
+                            {% if row[1][2] == 1 %}
+                                <tr>
+                                    <td><em>{{ row[0] }}</em></td>
+                                    <td><em>{{ row[1][0] }}</em></td>
+                                    {% if row[1][1] != None %}
+                                        <td><em>{{ row[1][1] }}</em></td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td>{{ row[0] }}</td>
+                                    <td>{{ row[1][0] }}</td>
+                                    {% if row[1][1] != None %}
+                                        <td>{{ row[1][1] }}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                </tr>
+                            {% endif %}
                         {% endfor %}
                     </table>
                 </div>

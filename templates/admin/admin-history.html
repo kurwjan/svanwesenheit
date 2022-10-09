@@ -35,8 +35,8 @@
     <div class="row justify-content-center">
         {% if status == 0 %}
             <!-- cancelled -->
-            <div class="col-md-8 col-sm-12 col-12">
-                <div class="card">
+            <div>
+                <div class="card" style="margin-bottom: 1rem;">
                     <div class="card-header header-lanis-color">
                         <i class="fa-solid fa-ban me-1"></i>
                         Ausfall
@@ -45,7 +45,49 @@
                         <p>Die SV fällt an diesem Tag aus.</p>
                     </div>
                 </div>
+                <div class="row row-cols-1 row-cols-md-2 g-2">
+                    {% for person in persons %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body text-dark">
+                                    <h5 class="card-title">{{ person[3] }}</h5>
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="{{ person[0] }}"
+                                                {% if person[1] == 'Anwesend' %} checked {% endif %}
+                                               form="today_form"
+                                               value="Anwesend"
+                                               id="anwesend-{{ person[0] }}"/>
+                                        <label class="form-check-label" for="anwesend-{{ person[0] }}"> Anwesend</label>
+                                    </div>
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="{{ person[0] }}" form="today_form"
+                                                {% if person[1] == 'Nicht anwesend' %} checked {% endif %}
+                                               value="Nicht anwesend"
+                                               id="nicht_anwesend-{{ person[0] }}"/>
+                                        <label class="form-check-label" for="nicht_anwesend-{{ person[0] }}"> Nicht
+                                            anwesend</label>
+                                    </div>
+                                </div>
+                                <div class="card-footer text-muted small-index">{{ person[4] }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
+            <form id="today_form" class="row" action="" method="post">
+                <input type="hidden" name="history_date" value="{{ date }}">
+                <button class="btn btn-primary mt-3" form="today_form" formaction="/a_change_history" type="submit">
+                    Ändern
+                </button>
+            </form>
+            <form class="row mt-2" method="post">
+                <input type="hidden" name="change_cancelled_session" value="{{ date }}">
+                <button class="btn btn-primary" type="submit" formaction="/a">Zu einer normalen Sitzung ändern</button>
+            </form>
+            <form class="row mt-2 mb-5" method="post">
+                <input type="hidden" name="history_date" value="{{ date }}">
+                <button class="btn btn-primary" type="submit" formaction="/delete_history">Löschen</button>
+            </form>
         {% elif status == 1 %}
             <!-- nothing created -->
             <div class="col-md-8 col-sm-12 col-12">
@@ -63,7 +105,7 @@
             <!-- overview -->
             <div>
                 <!-- elected positions-->
-                <div class="row row-cols-2 row-cols-md-2 g-2">
+                <div class="row row-cols-1 row-cols-md-2 g-2">
                     {% for person in persons %}
                         <div class="col">
                             <div class="card h-100">
@@ -127,7 +169,7 @@
                     </div>
                 </div>
                 <!-- other persons-->
-                <div class="card mb-4" style="margin-top: 1rem">
+                <div class="card mb-3" style="margin-top: 1rem">
                     <div class="card-header header-lanis-color">
                         <i class="fa-solid fa-person-rays me-1"></i>
                         Andere Personen
@@ -145,8 +187,14 @@
                     </div>
                 </div>
             </div>
-            <input type="hidden" form="today_form" name="date" value="{{ date }}">
-            <input class="btn btn-primary mb-5" form="today_form" type="submit" formaction="/a_change_history" value="Ändern">
+            <input type="hidden" form="today_form" name="history_date" value="{{ history_date }}">
+            <div class="row justify-content-center">
+                <input class="btn btn-primary" form="today_form" type="submit" formaction="/a_change_history" value="Ändern">
+            </div>
+            <form class="row justify-content-center mt-2 mb-5" method="post">
+                <input type="hidden" name="history_date" value="{{ history_date }}">
+                <button class="btn btn-primary" type="submit" formaction="/delete_history">Löschen</button>
+            </form>
         {% endif %}
     </div>
 
