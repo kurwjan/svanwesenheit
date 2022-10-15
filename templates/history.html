@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+
+{% block scripts %}
+    <!-- Show/hide reason text box and extend tables-->
+    <script src="static/scripts/edit-today.js"></script>
+{% endblock %}
+
+{% block history_bar %}
+    {% if status == 2 or status == 0 %}
+        <div id="nav2" role="alert">
+            <div class="container d-sm-block">
+                <div class="justify-content-center text-center text-white" style="display: flex;">
+                    <form>
+                        <input type="hidden" name="date" value="{{ last_day }}">
+                        <button type="submit" class="text-white btn btn-default me-2">
+                            <i class="fa-solid fa-arrow-left-long"></i>
+                        </button>
+                    </form>
+                    <h5 class="mt-1">
+                        {{ current_day }}
+                    </h5>
+                    <form>
+                        <input type="hidden" name="date" value="{{ next_day }}">
+                        <button type="submit" class="text-white btn btn-default ms-2">
+                            <i class="fa-solid fa-arrow-right-long"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+
+
+{% block main %}
+    <div class="row justify-content-center mb-4">
+        {% if status == 0 %}
+            <!-- cancelled -->
+            <div class="mb-5">
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header header-lanis-color">
+                        <i class="fa-solid fa-ban me-1"></i>
+                        Ausfall
+                    </div>
+                    <div class="card-body text-dark">
+                        <p>Die SV fällt an diesem Tag aus.</p>
+                    </div>
+                </div>
+                <div class="row row-cols-1 row-cols-md-2 g-2 mb-4">
+                    {% for person in persons %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body text-dark">
+                                    <h5 class="card-title">{{ person[3] }}</h5>
+                                    {% if person[1] == 'Anwesend' %}
+                                        <p class="fw-bold">Anwesend</p>
+                                    {% elif person[1] == 'Nicht anwesend' %}
+                                        <p class="fw-bold">Nicht anwesend</p>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer text-muted small-index">{{ person[4] }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% elif status == 1 %}
+            <!-- nothing created -->
+            <div class="col-md-8 col-sm-12 col-12">
+                <div class="card">
+                    <div class="card-header header-lanis-color">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        Info
+                    </div>
+                    <div class="card-body text-dark">
+                        <p>Es wurden noch keine SV-Tage erstellt.</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- overview -->
+            <div>
+                <!-- elected positions-->
+                <div class="row row-cols-1 row-cols-md-2 g-2">
+                    {% for person in persons %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body text-dark">
+                                    <h5 class="card-title">{{ person[3] }}</h5>
+                                    {% if person[1] == 'Anwesend' %}
+                                        <p class="fw-bold">Anwesend</p>
+                                    {% elif person[1] == 'Fehlend' %}
+                                        <p class="fw-bold">Fehlend</p>
+                                    {% else %}
+                                        <p class="fw-bold mb-1">Entschuldigt</p>
+                                        <p>{{ person[2] }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer text-muted small-index">{{ person[4] }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <!-- non elected positions-->
+                <div class="card" style="margin-top: 1rem">
+                    <div class="card-header header-lanis-color">
+                        <i class="fa-solid fa-person me-1"></i>
+                        Freiwillige Personen
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive mb-1">
+                            <table class="table table-borderless table-hover" id="non_elected_table">
+                                {% for person in not_elected_persons %}
+                                    <tr>
+                                        <td>{{ person[0] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- other persons-->
+                <div class="card mb-5" style="margin-top: 1rem">
+                    <div class="card-header header-lanis-color">
+                        <i class="fa-solid fa-person-rays me-1"></i>
+                        Andere Personen
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive mb-1">
+                            <table class="table table-borderless table-hover" id="other_persons_table">
+                                {% for person in other_persons %}
+                                    <tr>
+                                        <td>{{ person[0] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

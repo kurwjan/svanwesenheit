@@ -17,19 +17,6 @@
                 <input type="hidden" name="cancelled" value="cancelled">
                 <input type="submit" value="Entfall" class="btn btn-primary">
             </form>
-        {% elif status == 1 %}
-            <!-- cancelled -->
-            <div class="col-md-8 col-sm-12 col-12">
-                <div class="card">
-                    <div class="card-header header-lanis-color">
-                        <i class="fa-solid fa-ban me-1"></i>
-                        Ausfall
-                    </div>
-                    <div class="card-body text-dark">
-                        <p>Heute fällt die SV aus.</p>
-                    </div>
-                </div>
-            </div>
         {% else %}
             <!-- overview -->
             <div>
@@ -176,13 +163,13 @@
                 <input class="btn btn-primary" form="today_form" type="submit" value="Fertig">
             </div>
             <form class="row justify-content-center mb-1" action="/">
-                <button class="btn btn-primary mt-2 mb-4">Zurück</button>
+                <button class="btn btn-primary mt-2 mb-5">Zurück</button>
             </form>
         {% endif %}
     </div>
 
     {% if cancelled_date %}
-        <input class="btn btn-primary" form="today_form" type="hidden" name="date" value="{{ cancelled_date }}">
+        <input class="btn btn-primary" form="today_form" type="hidden" name="cancelled_date" value="{{ cancelled_date }}">
     {% endif %}
 
     <form id="today_form" method="post"></form>

@@ -24,9 +24,15 @@ function explanation(selected) {
         type_selector.textContent = "Als Bearbeiter kann man neue Sitzungen und Benutzer erstellen/bearbeiten."
     }
     else if (selected.value === "Nutzer + Bearbeiten") {
-        type_selector.textContent = "Man kann das gleiche wie ein Bearbeiter machen außer Benutzer erstellen."
+        type_selector.textContent = "Man kann das gleiche wie ein Bearbeiter machen außer Benutzer verwalten."
     }
     else {
-        type_selector.textContent = "Als Nutzer kann man die Anwesenheitslisten und etc. sehen."
+        type_selector.textContent = "Als Nutzer kann man die Anwesenheitslisten etc. sehen."
     }
+}
+
+function change_login_name(display_name) {
+    var login_name_textbox = document.getElementById("login_name_textbox");
+
+    login_name_textbox.value = display_name.value.toLowerCase().replace(/\s+/g, ".");
 }

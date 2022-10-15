@@ -5,10 +5,16 @@
     <meta name="viewport" content="initial-scale=1, width=device-width">
 
     <!-- Bootstrap -->
-    <link rel=stylesheet href="/static/css/scss-generated.css">
+    {% assets "scss_all" %}
+        <link rel=stylesheet type=text/css href="{{ ASSET_URL }}">
+    {% endassets %}
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+            integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js"
+            integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk"
+            crossorigin="anonymous"></script>
 
     <!-- Font Awesome -->
     <script src="https://kit.fontawesome.com/51d1c72de4.js" crossorigin="anonymous"></script>
@@ -25,32 +31,47 @@
     <title>SV-Anwesenheit</title>
 </head>
 <body class="d-flex flex-column">
-<nav class="navbar navbar-expand-md navbar-last hidden-print sticky navbar-dark">
-    <div class="container">
-        <div class="navbar-brand" id="title">SV-Anwesenheit</div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="/"><i class="fa-solid fa-calendar-day me-1"></i> Heute</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="/users"><i class="fa-solid fa-user me-1"></i> Personen</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="/history"><i class="fa-solid fa-clock-rotate-left me-1"></i> Historie</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="/offices"><i class="fa-solid fa-person-circle-question me-1"></i> Ämter</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-<div class="d-none d-sm-block">
+<div class="d-none d-md-block">
+    {% block navbar %}
+        <nav class="navbar navbar-expand-md navbar-dark">
+            <div class="container">
+                <img class="me-3" src="/static/css/sv-logo.png" style="height: 2.5rem">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <hr class="d-lg-none text-white-50">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="/"><i
+                                    class="fa-solid fa-calendar-day me-1"></i>
+                                Heute</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="/users"><i class="fa-solid fa-user me-1"></i>
+                                Personen</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="/history"><i
+                                    class="fa-solid fa-clock-rotate-left me-1"></i> Historie</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="/offices"><i
+                                    class="fa-solid fa-person-circle-question me-1"></i> Ämter</a>
+                        </li>
+                    </ul>
+                    <hr class="d-lg-none text-white-50">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="/login"><i
+                                    class="fa-solid fa-right-from-bracket me-1"></i> Abmelden</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    {% endblock %}
     {% block history_bar %}{% endblock %}
 </div>
 {% if get_flashed_messages() %}
@@ -71,8 +92,9 @@
     </div>
 </main>
 <footer class="fixed-bottom">
-    <div class="d-block d-sm-none">
+    <div class="d-block d-md-none">
         {{ self.history_bar() }}
+        {{ self.navbar() }}
     </div>
 </footer>
 </body>
