@@ -16,7 +16,7 @@
                             <i class="fa-solid fa-arrow-left-long"></i>
                         </button>
                     </form>
-                    <h5 class="mt-1">
+                    <h5 style="margin-top: .38rem !important;">
                         {{ current_day }}
                     </h5>
                     <form>
@@ -31,10 +31,8 @@
     {% endif %}
 {% endblock %}
 
-
-
 {% block main %}
-    <div class="row justify-content-center mb-4">
+    <div class="row justify-content-center">
         {% if status == 0 %}
             <!-- cancelled -->
             <div>
@@ -76,6 +74,20 @@
                     {% endfor %}
                 </div>
             </div>
+            <form id="today_form" class="row" action="" method="post">
+                <input type="hidden" name="history_date" value="{{ history_date }}">
+                <button class="btn btn-primary mt-3" form="today_form" formaction="/change_history" type="submit">
+                    Ändern
+                </button>
+            </form>
+            <!-- <form class="row mt-2" method="post">
+                <input type="hidden" name="change_cancelled_session" value="{{ date }}">
+                <button class="btn btn-primary" type="submit" formaction="/a">Zu einer normalen Sitzung ändern</button>
+            </form> -->
+            <form class="row mt-2 mb-5" method="post">
+                <input type="hidden" name="history_date" value="{{ history_date }}">
+                <button class="btn btn-primary mb-5" type="submit" formaction="/delete_history">Löschen</button>
+            </form>
         {% elif status == 1 %}
             <!-- nothing created -->
             <div class="col-md-8 col-sm-12 col-12">
@@ -99,14 +111,39 @@
                             <div class="card h-100">
                                 <div class="card-body text-dark">
                                     <h5 class="card-title">{{ person[3] }}</h5>
-                                    {% if person[1] == 'Anwesend' %}
-                                        <p class="fw-bold">Anwesend</p>
-                                    {% elif person[1] == 'Fehlend' %}
-                                        <p class="fw-bold">Fehlend</p>
-                                    {% else %}
-                                        <p class="fw-bold mb-1">Entschuldigt</p>
-                                        <p>{{ person[2] }}</p>
-                                    {% endif %}
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="{{ person[0] }}"
+                                                {% if person[1] == 'Anwesend' %} checked {% endif %}
+                                               form="today_form"
+                                               value="Anwesend"
+                                               id="anwesend-{{ person[0] }}"
+                                               onclick="hide('entschuldigt-{{ person[0] }}-textbox')"/>
+                                        <label class="form-check-label" for="anwesend-{{ person[0] }}"> Anwesend</label>
+                                    </div>
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="{{ person[0] }}" form="today_form"
+                                                {% if person[1] == 'Fehlend' %} checked {% endif %}
+                                               value="Fehlend"
+                                               id="fehlend-{{ person[0] }}"
+                                               onclick="hide('entschuldigt-{{ person[0] }}-textbox')"/>
+                                        <label class="form-check-label" for="fehlend-{{ person[0] }}"> Fehlend</label>
+                                    </div>
+                                    <div class="input-group mb-1">
+                                        <input class="me-1" type="radio" name="{{ person[0] }}" form="today_form"
+                                                {% if person[1] == 'Entschuldigt' %} checked {% endif %}
+                                               value="Entschuldigt"
+                                               id="entschuldigt-{{ person[0] }}"
+                                               onclick="show('entschuldigt-{{ person[0] }}-textbox')"/>
+                                        <label class="form-check-label" for="entschuldigt-{{ person[0] }}">
+                                            Entschuldigt</label>
+                                    </div>
+                                    <input {% if not person[1] == 'Entschuldigt' %} style="display: none;" {% endif %}
+                                                                                    type="text" form="today_form"
+                                                                                    class="form-control"
+                                            {% if person[1] == 'Entschuldigt' %} value="{{ person[2] }}" {% endif %}
+                                                                                    name="reason-{{ person[0] }}"
+                                                                                    placeholder="Grund"
+                                                                                    id="entschuldigt-{{ person[0] }}-textbox">
                                 </div>
                                 <div class="card-footer text-muted small-index">{{ person[4] }}</div>
                             </div>
@@ -132,7 +169,7 @@
                     </div>
                 </div>
                 <!-- other persons-->
-                <div class="card mb-4" style="margin-top: 1rem">
+                <div class="card mb-3" style="margin-top: 1rem">
                     <div class="card-header header-lanis-color">
                         <i class="fa-solid fa-person-rays me-1"></i>
                         Andere Personen
@@ -150,6 +187,17 @@
                     </div>
                 </div>
             </div>
+            <input type="hidden" form="today_form" name="history_date" value="{{ history_date }}">
+            <div class="row justify-content-center">
+                <input class="btn btn-primary" form="today_form" type="submit" formaction="/change_history" value="Ändern">
+            </div>
+            <form class="row justify-content-center mt-2 mb-5" method="post">
+                <input type="hidden" name="history_date" value="{{ history_date }}">
+                <button class="btn btn-primary mb-5" type="submit" formaction="/delete_history">Löschen</button>
+            </form>
         {% endif %}
     </div>
+
+    <form id="today_form" method="post"></form>
+
 {% endblock %}

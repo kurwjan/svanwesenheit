@@ -23,7 +23,7 @@ def login_required(f):
             cur = db.connection.cursor()
 
             # Select something in users table from current user_id
-            cur.execute('SELECT username FROM users WHERE id = %s', [session.get("user_id")])
+            cur.execute('SELECT username FROM users WHERE id = %s AND deleted = 0', [session.get("user_id")])
             check = cur.fetchone()
 
             # If account is deleted or so, redirect to log in
@@ -52,9 +52,9 @@ def admin_required(f):
     return decorated_function
 
 
-def editor_required(f):
+def edit_permissions_required(f):
     """
-    Decorate routes to require editor type account or higher.
+    Decorate routes to require edit permissions.
 
     https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
     """

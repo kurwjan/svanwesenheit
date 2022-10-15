@@ -6,7 +6,7 @@ from flask_session import Session
 from datetime import datetime
 from flask_assets import Environment, Bundle
 
-from decorated_functions import login_required, editor_required, admin_required
+from decorated_functions import login_required, edit_permissions_required, admin_required
 from helpers import history_get_dates
 
 app = Flask(__name__)
@@ -54,31 +54,31 @@ def login():
 
     if request.method == "POST":
         # If user account is newly created
-        if request.form.get("first_login"):
+        if request.form.get("create_password"):
             # Check if both passwords are provided
             if not request.form.get("new_password"):
                 flash("Bitte gebe ein neues Passwort ein!")
-                return render_template("first-login.html")
+                return render_template("create_password.html")
             elif not request.form.get("confirmation"):
                 flash("Bitte gebe die Bestätigung ein!")
-                return render_template("first-login.html")
+                return render_template("create_password.html")
 
             # Check if both passwords are the same
             if request.form.get("new_password") != request.form.get("confirmation"):
                 flash("Beide Passwörter stimmen nicht überein!")
-                return render_template("first-login.html")
+                return render_template("create_password.html")
 
             # Update password in database
             cur = db.connection.cursor()
             cur.execute('UPDATE users SET hash = %s, reset = 0 WHERE id = %s',
-                        (generate_password_hash(request.form.get("confirmation")), request.form.get("first_login")))
+                        (generate_password_hash(request.form.get("confirmation")), request.form.get("create_password")))
             db.connection.commit()
             cur.close()
 
-            session["user_id"] = request.form.get("first_login")
+            session["user_id"] = request.form.get("create_password")
 
             # Redirect to main page
-            return redirect("/a")
+            return redirect("/")
 
         username = request.form.get("username")
         password = request.form.get("password")
@@ -91,18 +91,18 @@ def login():
         # Query database for username
         cur = db.connection.cursor()
         cur.execute('SELECT * FROM users WHERE loginname = %s AND deleted = 0', [username])
-        row = cur.fetchone()
+        user = cur.fetchone()
         cur.close()
 
         # Check if username exists
-        if not row:
+        if not user:
             flash("Falscher Benutzername oder ungültiges Passwort!")
             return render_template("login.html")
 
         # Check if user is newly created
-        if row[7] == 1:
-            session["user_type"] = row[3]
-            return render_template("first-login.html", user_id=row[0])
+        if user[7] == 1:
+            session["user_type"] = user[3]
+            return render_template("create_password.html", user_id=user[0])
 
         # Ensure password was submitted
         if not password:
@@ -110,22 +110,22 @@ def login():
             return render_template("login.html")
 
         # Ensure password is correct
-        if not check_password_hash(row[1], password):
+        if not check_password_hash(user[1], password):
             flash("Falscher Benutzername oder ungültiges Passwort!")
             return render_template("login.html")
 
-        if row[6] == 1:
+        if user[6] == 1:
             flash("Dein Konto wurde geblockt!")
             return render_template("login.html")
 
         # Remember which user has logged in
-        session["user_id"] = row[0]
+        session["user_id"] = user[0]
 
         # Remember user account type
-        session["user_type"] = row[3]
+        session["user_type"] = user[3]
 
         # Redirect user to home page
-        return redirect("/a")
+        return redirect("/")
     else:
         session.clear()
         return render_template("login.html")
@@ -140,7 +140,7 @@ def index():
 
     # # If user has higher privileges, redirect
     if not session.get("user_type") == "Nutzer":
-        return redirect("/a")
+        return redirect("/create_session")
 
     cur = db.connection.cursor()
 
@@ -149,19 +149,19 @@ def index():
 
     # Check if a session was created today
     if not check:
-        return render_template("/normal/today.html")
+        return render_template("no_sv.html")
     else:
         return redirect("/history")
 
 
-@app.route("/a", methods=["GET", "POST"])
+@app.route("/create_session", methods=["GET", "POST"])
 @login_required
-@editor_required
-def a_index():
+@edit_permissions_required
+def create_session():
     """
-    ADMIN OR EDITOR REQUIRED
+    Needs editor permissions
 
-    Add SV day, select status from users, add non-elected persons and submit it to the database.
+    Adds/Changes SV day, select status from users, add non-elected persons and submit it to the database.
     """
 
     # Get data and send it to database
@@ -170,52 +170,53 @@ def a_index():
             # Query users
             cur = db.connection.cursor()
             cur.execute('SELECT * FROM users WHERE deleted = 0')
-            rows = cur.fetchall()
+            persons = cur.fetchall()
             cur.close()
 
-            return render_template("/admin/edit-today.html", persons=rows, status=2)
+            return render_template("create_session.html", persons=persons, status=1)
 
         if request.form.get("cancelled"):
             cur = db.connection.cursor()
             cur.execute('SELECT * FROM users WHERE deleted = 0')
-            rows = cur.fetchall()
+            persons = cur.fetchall()
             db.connection.commit()
             cur.close()
-            return render_template("/admin/edit-cancelled.html", persons=rows)
+            return render_template("create_cancelled_session.html", persons=persons)
 
-        if request.form.get("change_cancelled_session"):
-            # Query users
-            cur = db.connection.cursor()
-            cur.execute('SELECT * FROM users WHERE deleted = 0')
-            rows = cur.fetchall()
-            cur.close()
+        # Feature postponed
+        # if request.form.get("change_cancelled_session"):
+        #    # Query users
+        #    cur = db.connection.cursor()
+        #    cur.execute('SELECT * FROM users WHERE deleted = 0')
+        #    rows = cur.fetchall()
+        #    cur.close()
+        #
+        #    return render_template("/admin/create_session.html", persons=rows, status=2,
+        #                           cancelled_date=request.form.get("change_cancelled_session"))
 
-            return render_template("/admin/edit-today.html", persons=rows, status=2,
-                                   cancelled_date=request.form.get("change_cancelled_session"))
-
-        cancelled_date = request.form.get("date")
+        cancelled_date = request.form.get("cancelled_date")
 
         date = cancelled_date if cancelled_date else datetime.today().strftime('%Y-%m-%d')
 
         # Query users
         cur = db.connection.cursor()
         cur.execute('SELECT id FROM users WHERE deleted = 0')
-        rows = cur.fetchall()
+        persons_query = cur.fetchall()
 
         if cancelled_date:
             cur.execute('DELETE FROM history WHERE date = %s', [cancelled_date])
 
         # Get id, status ("Entschuldigt", "Fehlend", "Anwesend") and reason (if "Entschuldigt") from all users.
         persons = []
-        for row in rows:
-            person = [row[0]]
+        for person in persons_query:
+            person = [person[0]]
 
-            status = request.form.get(str(row[0]))
+            status = request.form.get(str(person[0]))
             person.append(status)
 
             # If Entschuldigt get reason and append
             if status == "Entschuldigt":
-                person.append(request.form.get("reason-" + str(row[0])))
+                person.append(request.form.get("reason-" + str(person[0])))
 
             persons.append(person)
 
@@ -269,70 +270,16 @@ def a_index():
 
         # Check if a session was created today
         if not check:
-            return render_template("/admin/edit-today.html", status=0)
+            return render_template("create_session.html", status=0)
         else:
             return redirect("/history")
 
 
-@app.route("/users")
+@app.route("/users", methods=["GET", "POST"])
 @login_required
 def users():
     """
-        Show all persons
-    """
-
-    if session.get("user_type") == "Bearbeiter":
-        return redirect("/a_create_user")
-
-    # Query users
-    cur = db.connection.cursor()
-    cur.execute('SELECT * FROM users WHERE deleted = 0')
-    rows = cur.fetchall()
-
-    # Get an id from all users
-    cur.execute('SELECT id FROM users WHERE deleted = 0 ORDER BY id')
-    ids = cur.fetchall()
-
-    # Count their status ("Anwesend", "Fehlend", "Entschuldigt")
-    status = []
-    for user_id in ids:
-        row = []
-        cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s  AND cancelled = 0',
-                    [user_id, "Anwesend"])
-        anwesend = cur.fetchone()
-        row.append(anwesend)
-
-        cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s', [user_id, "Fehlend"])
-        fehlend = cur.fetchone()
-        row.append(fehlend)
-
-        cur.execute('SELECT COUNT(status) FROM history WHERE user_id = %s AND status = %s',
-                    [user_id, "Entschuldigt"])
-        entschuldigt = cur.fetchone()
-
-        row.append(entschuldigt)
-        status.append(row)
-
-    # Count non-elected ("Freiwillige Personen") names
-    cur.execute('SELECT DISTINCT(other_name), COUNT(other_name) '
-                'FROM history WHERE type = %s '
-                'GROUP BY other_name', ["not_elected"])
-    other_persons = cur.fetchall()
-
-    cur.close()
-
-    return render_template("/normal/users.html", users=rows, status=status,
-                           not_elected_persons=other_persons)
-
-
-@app.route("/a_create_user", methods=["GET", "POST"])
-@login_required
-@admin_required
-def admin_create_user():
-    """
-    ADMIN REQUIRED
-
-    Create new user or manage users
+    Create and manage new users or show all users.
     """
 
     if request.method == "POST":
@@ -340,30 +287,30 @@ def admin_create_user():
         usertype = request.form.get("usertype")
         office = request.form.get("user_office")
         notice = request.form.get("notice")
-        loginname = request.form.get("loginname")
+        login_name = request.form.get("loginname")
 
         if not username:
             flash("Kein Anzeigename angegeben!")
-            return redirect('/a_create_user')
+            return redirect('/manage_users')
 
-        if not loginname:
+        if not login_name:
             flash("Kein Loginname angegeben!")
-            return redirect('/a_create_user')
+            return redirect('/manage_users')
 
         # Create new user in database
         cur = db.connection.cursor()
         cur.execute('INSERT INTO users (hash, username, type, office, notice, loginname) '
                     'VALUES (%s, %s, %s, %s, %s, %s)',
-                    ("PASSWORD", username, usertype, office, notice, loginname))
+                    ("PASSWORD", username, usertype, office, notice, login_name))
         db.connection.commit()
         cur.close()
 
-        return redirect('/a_create_user')
+        return redirect('/users')
     else:
         # Query users
         cur = db.connection.cursor()
         cur.execute('SELECT * FROM users WHERE deleted = 0')
-        rows = cur.fetchall()
+        users = cur.fetchall()
 
         # Get an id from all users
         cur.execute('SELECT id FROM users WHERE deleted = 0 ORDER BY id')
@@ -398,7 +345,10 @@ def admin_create_user():
 
         cur.close()
 
-        return render_template("/admin/admin-users.html", users=rows, status=status,
+        if session.get("user_type") == "Bearbeiter":
+            return render_template("manage_users.html", users=users, status=status,
+                                   not_elected_persons=not_elected_persons)
+        return render_template("users.html", users=users, status=status,
                                not_elected_persons=not_elected_persons)
 
 
@@ -425,8 +375,8 @@ def history():
         # If there is no sv session
         if not history:
             if not session.get("user_type") == "Normal":
-                return render_template("/admin/admin-history.html", status=1)
-            return render_template("/normal/history.html", status=1)
+                return render_template("manage_history.html", status=1)
+            return render_template("history.html", status=1)
     else:
         cur.execute('SELECT date, cancelled FROM history WHERE date = %s', [history_date])
         history = cur.fetchone()
@@ -440,8 +390,8 @@ def history():
             # If there is no sv session
             if not history:
                 if not session.get("user_type") == "Normal":
-                    return render_template("/admin/admin-history.html", status=1)
-                return render_template("/normal/history.html", status=1)
+                    return render_template("manage_history.html", status=1)
+                return render_template("history.html", status=1)
 
     # Get all elected persons
     cur.execute(
@@ -468,12 +418,12 @@ def history():
         current_day, last_day, next_day = history_get_dates(history)
 
         if not session.get("user_type") == "Nutzer":
-            return render_template("/admin/admin-history.html", status=0,
+            return render_template("manage_history.html", status=0,
                                    current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
-                                   last_day=last_day, date=current_day.strftime('%Y-%m-%d'), persons=persons)
-        return render_template("/normal/history.html", status=0,
+                                   last_day=last_day, history_date=history[0], persons=persons)
+        return render_template("history.html", status=0,
                                current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
-                               last_day=last_day, date=current_day.strftime('%Y-%m-%d'), persons=persons)
+                               last_day=last_day, history_date=history[0], persons=persons)
 
     # Get all voluntary persons
     cur.execute("SELECT other_name FROM history WHERE type = 'not_elected' AND date = %s",
@@ -491,19 +441,19 @@ def history():
     current_day, last_day, next_day = history_get_dates(history)
 
     if not session.get("user_type") == "Nutzer":
-        return render_template("/admin/admin-history.html", status=2, not_elected_persons=not_elected_persons,
+        return render_template("manage_history.html", status=2, not_elected_persons=not_elected_persons,
                                other_persons=other_persons, persons=persons,
                                current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
                                history_date=history[0])
-    return render_template("/normal/history.html", status=2, not_elected_persons=not_elected_persons,
+    return render_template("history.html", status=2, not_elected_persons=not_elected_persons,
                            other_persons=other_persons, persons=persons,
                            current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
                            history_date=history[0])
 
 
-@app.route("/a_change_history", methods=["POST"])
+@app.route("/change_history", methods=["POST"])
 @login_required
-@editor_required
+@edit_permissions_required
 def change_history():
     """
         ADMIN OR EDITOR REQUIRED
@@ -540,7 +490,7 @@ def change_history():
 
 @app.route("/delete_history", methods=["POST"])
 @login_required
-@editor_required
+@edit_permissions_required
 def delete_history():
     """
         ADMIN OR EDITOR REQUIRED
@@ -597,7 +547,7 @@ def user_history():
 
     cur.close()
 
-    return render_template("/normal/user_history.html", history=history, person=name[0])
+    return render_template("user_history.html", history=history, person=name[0])
 
 
 @app.route("/delete_user", methods=["POST"])

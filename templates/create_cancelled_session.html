@@ -12,7 +12,8 @@
                             <div class="card-body text-dark">
                                 <h5 class="card-title">{{ person[2] }}</h5>
                                 <div class="input-group mb-1">
-                                    <input class="me-1" type="radio" name="{{ person[0] }}" checked form="cancelled_form"
+                                    <input class="me-1" type="radio" name="{{ person[0] }}" checked
+                                           form="cancelled_form"
                                            value="Anwesend"
                                            id="anwesend-{{ person[0] }}"/>
                                     <label class="form-check-label" for="anwesend-{{ person[0] }}"> Anwesend</label>
@@ -21,7 +22,8 @@
                                     <input class="me-1" type="radio" name="{{ person[0] }}" form="cancelled_form"
                                            value="Nicht anwesend"
                                            id="nicht_anwesend-{{ person[0] }}"/>
-                                    <label class="form-check-label" for="nicht_anwesend-{{ person[0] }}"> Nicht anwesend</label>
+                                    <label class="form-check-label" for="nicht_anwesend-{{ person[0] }}"> Nicht
+                                        anwesend</label>
                                 </div>
                             </div>
                             <div class="card-footer">
@@ -32,15 +34,19 @@
                 {% endfor %}
             </div>
 
-        <div class="row justify-content-center mt-3">
-            <input class="btn btn-primary" form="cancelled_form" type="submit" value="Fertig">
+            <div class="row justify-content-center mt-3">
+                <input class="btn btn-primary" form="cancelled_form" type="submit" value="Fertig">
+            </div>
+            <form class="row justify-content-center mb-1" action="/">
+                <button class="btn btn-primary mt-2 mb-5">Zurück</button>
+            </form>
         </div>
-        <form class="row justify-content-center mb-1" action="/">
-            <button class="btn btn-primary mt-2 mb-4">Zurück</button>
-        </form>
-    </div>
 
-    <input type="hidden" name="create_cancelled_session" value="create_cancelled_session" id="create_cancelled_session" form="cancelled_form">
-    <form id="cancelled_form" method="post"></form>
+        <input type="hidden" name="create_cancelled_session" value="1"
+               id="create_cancelled_session" form="cancelled_form">
+
+        <form id="cancelled_form" method="post"></form>
+
+    </div>
 
 {% endblock %}
