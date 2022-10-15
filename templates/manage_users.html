@@ -171,7 +171,7 @@
             {% endfor %}
         </div>
         <div>
-            <div class="card mb-4">
+            <div class="card mb-5">
                 <div class="card-header header-lanis-color">
                     <i class="fa-solid fa-user me-1"></i>
                     Freiwillige Personen
@@ -207,7 +207,7 @@
                         <form id="add_user_form" method="post">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" placeholder="Anzeigename" name="username"
-                                       id="user_name_textbox">
+                                       id="user_name_textbox" onKeyUp="change_login_name(this)">
                                 <label class="input-group-text" for="user_type_select">Typ</label>
                                 <select class="form-select" name="usertype" id="user_type_select" onchange="explanation(this)">
                                     <option value="Nutzer">Nutzer</option>
@@ -217,19 +217,19 @@
                             </div>
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" placeholder="Loginname, zB.: vorname.nachname" name="loginname"
-                                       id="user_name_textbox">
+                                       id="login_name_textbox">
                             </div>
                             <div class="input-group mb-3">
                                 <label class="input-group-text" for="user_office_select">Amt</label>
                                 <select class="form-select" name="user_office" id="user_office_select">
                                     <option value="Multifunktionales Mitglied">Multifunktionales Mitglied</option>
-                                    <option value="Unterstufensprecher">Unterstufensprecher</option>
-                                    <option value="Mittelstufensprecher">Mittelstufensprecher</option>
-                                    <option value="Oberstufensprecher">Oberstufensprecher</option>
-                                    <option value="Schulsprecher">Schulsprecher</option>
+                                    <option value="Unterstufensprecher">Unterstufensprecher*in</option>
+                                    <option value="Mittelstufensprecher">Mittelstufensprecher*in</option>
+                                    <option value="Oberstufensprecher">Oberstufensprecher*in</option>
+                                    <option value="Schulsprecher">Schulsprecher*in</option>
                                     <option value="Schulkonferenz Mitglied">Schulkonferenz Mitglied</option>
-                                    <option value="SSR-Deligierte">SSR-Deligierte</option>
-                                    <option value="SV-Verbindungslehrkraft">SV-Verbindungslehrkraft</option>
+                                    <option value="SSR-Deligierte">SSR-Deligierte/r</option>
+                                    <option value="SV-Verbindungslehrkraft">Verbindungslehrkraft</option>
                                 </select>
                             </div>
                             <div class="input-group mb-3">
@@ -239,7 +239,7 @@
                             </div>
                         </form>
                         <div class="mt-2 alert alert-info" id="explanation">
-                            Als Bearbeiter kann man neue Sitzungen und Nutzer erstellen/bearbeiten.
+                            Als Nutzer kann man die Anwesenheitslisten etc. sehen.
                         </div>
                     </div>
                     <div class="modal-footer">
