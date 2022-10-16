@@ -80,7 +80,7 @@
             </div>
         {% else %}
             <!-- overview -->
-            <div>
+            <div class="mb-5">
                 <!-- elected positions-->
                 <div class="row row-cols-1 row-cols-md-2 g-2">
                     {% for person in persons %}
@@ -127,7 +127,7 @@
                         Andere Personen
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive mb-1">
+                        <div class="table-responsive">
                             <table class="table table-borderless table-hover" id="other_persons_table">
                                 {% for person in other_persons %}
                                     <tr>
