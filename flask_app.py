@@ -4,7 +4,7 @@ from flask_mysqldb import MySQL
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_session import Session
 from datetime import datetime
-from flask_assets import Environment, Bundle
+#from flask_assets import Environment, Bundle
 
 from decorated_functions import login_required, edit_permissions_required, admin_required
 from helpers import history_get_dates, get_type
@@ -27,16 +27,16 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-assets = Environment(app)
-assets.url = app.static_url_path
+#assets = Environment(app)
+#assets.url = app.static_url_path
 
 # Scss files
-scss = Bundle(
-    "assets/main.scss",
-    filters="libsass",
-    output="css/scss-generated.css"
-)
-assets.register("scss_all", scss)
+#scss = Bundle(
+#    "assets/main.scss",
+#    filters="libsass",
+#    output="css/scss-generated.css"
+#)
+#assets.register("scss_all", scss)
 
 
 @app.after_request
