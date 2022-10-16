@@ -35,3 +35,11 @@ def history_get_dates(history):
     cur.close()
 
     return current_day, last_day, next_day
+
+
+def get_type(user_id):
+    """ Get type of stored user id. """
+    cur = db.connection.cursor()
+    cur.execute('SELECT type FROM users WHERE id = %s', [user_id])
+    type = cur.fetchone()
+    return type[0]

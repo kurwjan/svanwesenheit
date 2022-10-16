@@ -2,6 +2,8 @@ from flask import Flask, session, redirect
 from flask_mysqldb import MySQL
 from functools import wraps
 
+from helpers import get_type
+
 app = Flask(__name__)
 
 # Create database
@@ -45,7 +47,7 @@ def admin_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("user_type") != "Bearbeiter":
+        if get_type(session.get("user_id")) != "Admin":
             return redirect("/")
         return f(*args, **kwargs)
 
@@ -61,7 +63,7 @@ def edit_permissions_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("user_type") == "Bearbeiter" or session.get("user_type") == "Nutzer + Bearbeiten":
+        if get_type(session.get("user_id")) == "Admin" or get_type(session.get("user_id")) == "Bearbeiter":
             return f(*args, **kwargs)
         return redirect("/")
 

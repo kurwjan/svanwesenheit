@@ -4,10 +4,10 @@ from flask_mysqldb import MySQL
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_session import Session
 from datetime import datetime
-#from flask_assets import Environment, Bundle
+from flask_assets import Environment, Bundle
 
 from decorated_functions import login_required, edit_permissions_required, admin_required
-from helpers import history_get_dates
+from helpers import history_get_dates, get_type
 
 app = Flask(__name__)
 
@@ -27,16 +27,16 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-#assets = Environment(app)
-#assets.url = app.static_url_path
+assets = Environment(app)
+assets.url = app.static_url_path
 
 # Scss files
-#scss = Bundle(
-#    "assets/main.scss",
-#    filters="libsass",
-#    output="css/scss-generated.css"
-#)
-#assets.register("scss_all", scss)
+scss = Bundle(
+    "assets/main.scss",
+    filters="libsass",
+    output="css/scss-generated.css"
+)
+assets.register("scss_all", scss)
 
 
 @app.after_request
@@ -46,6 +46,16 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
+
+@app.route('/manage_user', methods=["POST"])
+def manage_user():
+
+    cur = db.connection.cursor()
+    cur.execute('SELECT * FROM users WHERE id = %s', [request.form.get("user_id")])
+    user = cur.fetchone()
+
+    return render_template("manage_user.html", user=user)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -139,7 +149,7 @@ def index():
     """
 
     # # If user has higher privileges, redirect
-    if not session.get("user_type") == "Nutzer":
+    if not get_type(session.get("user_id")) == "Nutzer":
         return redirect("/create_session")
 
     cur = db.connection.cursor()
@@ -200,6 +210,13 @@ def create_session():
 
         # Query users
         cur = db.connection.cursor()
+
+        cur.execute('SELECT id FROM history WHERE date = %s', [date])
+        exists_session = cur.fetchone()
+
+        if exists_session:
+            return redirect("/")
+
         cur.execute('SELECT id FROM users WHERE deleted = 0')
         persons_query = cur.fetchall()
 
@@ -345,7 +362,7 @@ def users():
 
         cur.close()
 
-        if session.get("user_type") == "Bearbeiter":
+        if get_type(session.get("user_id")) == "Admin":
             return render_template("manage_users.html", users=users, status=status,
                                    not_elected_persons=not_elected_persons)
         return render_template("users.html", users=users, status=status,
@@ -374,7 +391,7 @@ def history():
 
         # If there is no sv session
         if not history:
-            if not session.get("user_type") == "Normal":
+            if not get_type(session.get("user_id")) == "Normal":
                 return render_template("manage_history.html", status=1)
             return render_template("history.html", status=1)
     else:
@@ -389,7 +406,7 @@ def history():
 
             # If there is no sv session
             if not history:
-                if not session.get("user_type") == "Normal":
+                if not get_type(session.get("user_id")) == "Normal":
                     return render_template("manage_history.html", status=1)
                 return render_template("history.html", status=1)
 
@@ -417,7 +434,7 @@ def history():
         # Get data for top bar
         current_day, last_day, next_day = history_get_dates(history)
 
-        if not session.get("user_type") == "Nutzer":
+        if not get_type(session.get("user_id")) == "Nutzer":
             return render_template("manage_history.html", status=0,
                                    current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day,
                                    last_day=last_day, history_date=history[0], persons=persons)
@@ -440,7 +457,7 @@ def history():
     # Get data for top bar
     current_day, last_day, next_day = history_get_dates(history)
 
-    if not session.get("user_type") == "Nutzer":
+    if not get_type(session.get("user_id")) == "Nutzer":
         return render_template("manage_history.html", status=2, not_elected_persons=not_elected_persons,
                                other_persons=other_persons, persons=persons,
                                current_day=current_day.strftime('%A, %-d.%-m.%Y'), next_day=next_day, last_day=last_day,
@@ -562,7 +579,7 @@ def delete_user():
     db.connection.commit()
     cur.close()
 
-    return '', 204
+    return redirect("/users")
 
 
 @app.route("/reset_user", methods=["POST"])
@@ -623,7 +640,39 @@ def change_notice():
     db.connection.commit()
     cur.close()
 
-    return redirect("/a_create_user")
+    return '', 204
+
+
+@app.route("/change_type", methods=["POST"])
+@login_required
+@admin_required
+def change_type():
+    """ Change type of user """
+    user_id = request.form.get("user_id")
+    type = request.form.get("type")
+
+    cur = db.connection.cursor()
+    cur.execute('UPDATE users SET type = %s WHERE id = %s', [type, user_id])
+    db.connection.commit()
+    cur.close()
+
+    return '', 204
+
+
+@app.route("/change_office", methods=["POST"])
+@login_required
+@admin_required
+def change_office():
+    """ Change office of user """
+    user_id = request.form.get("user_id")
+    office = request.form.get("office")
+
+    cur = db.connection.cursor()
+    cur.execute('UPDATE users SET office = %s WHERE id = %s', [office, user_id])
+    db.connection.commit()
+    cur.close()
+
+    return '', 204
 
 
 @app.route("/offices")

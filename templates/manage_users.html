@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block scripts %}
+    <!-- Show/hide reason text box and extend tables-->
     <script src="static/scripts/admin_users.js"></script>
 {% endblock %}
 
@@ -11,7 +12,7 @@
         </button>
         <div class="row row-cols-1 row-cols-md-2 g-2">
             {% for user in users %}
-                {% if user[3] == 'Bearbeiter' %}
+                {% if user[3] == 'Admin' %}
                     <div class="col" id="{{ user[0] }}">
                         <div class="card border-danger mb-3">
                             <div class="card-header text-black">{{ user[4] }}</div>
@@ -35,58 +36,15 @@
                                 <form id="history-{{ user[0] }}" action="/user_history" method="post"
                                       class="flex-column d-flex mt-1">
                                     <input type="hidden" name="user_id" value="{{ user[0] }}">
-                                    <input type="submit" value="Historie" class="btn btn-outline-danger mb-1">
+                                    <input type="submit" value="Historie" class="btn btn-danger mb-1">
                                 </form>
-                                <button type="button" data-bs-toggle="modal"
-                                        data-bs-target="#change_modal_{{ user[0] }}"
-                                        class="btn btn-outline-danger mb-1">
-                                    Hinweis ändern
-                                </button>
-                                 {% if user[7] == 1 %}
-                                     <button class="btn btn-danger mb-1" disabled>Passwort zurückgesetzt</button>
-                                 {% else %}
-                                    <form id="reset-{{ user[0] }}" action="/reset_user" method="post"
-                                      class="flex-column d-flex mb-1">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen" class="btn btn-danger"
-                                        onclick="deactivate('{{ user[0] }}'); submit();">
-                                    </form>
-                                 {% endif %}
-                                {% if user[6] == 0 %}
-                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: flex !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Blockieren" class="btn btn-danger"
-                                               onclick="block('{{ user[0] }}')">
-                                    </form>
-                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: none !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Entblockieren" class="btn btn-danger"
-                                               onclick="unblock('{{ user[0] }}')">
-                                    </form>
-                                {% else %}
-                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: flex !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Entblockieren" class="btn btn-danger"
-                                               onclick="unblock('{{ user[0] }}')">
-                                    </form>
-                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: none !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Blockieren" class="btn btn-danger"
-                                               onclick="block('{{ user[0] }}')">
-                                    </form>
-                                {% endif %}
-                                <form id="form-{{ user[0] }}" action="/delete_user" method="post"
-                                      class="flex-column d-flex">
+                                <form action="/manage_user" method="post"
+                                          class="flex-column d-flex mt-1">
                                     <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                    <input type="submit" value="Löschen" class="btn btn-danger"
-                                           onclick="remove_card('{{ user[0] }}')">
+                                    <input type="submit" value="Verwalten" class="btn btn-danger">
                                 </form>
                             </div>
-                            <div class="card-footer text-black">Bearbeiter</div>
+                            <div class="card-footer text-black">Admin</div>
                         </div>
                     </div>
                 {% else %}
@@ -113,55 +71,12 @@
                                 <form id="history-{{ user[0] }}" action="/user_history" method="post"
                                       class="flex-column d-flex mt-1">
                                     <input type="hidden" name="user_id" value="{{ user[0] }}">
-                                    <input type="submit" value="Historie" class="btn btn-outline-primary mb-1">
+                                    <input type="submit" value="Historie" class="btn btn-primary mb-1">
                                 </form>
-                                <button type="button" data-bs-toggle="modal"
-                                        data-bs-target="#change_modal_{{ user[0] }}"
-                                        class="btn btn-outline-primary mb-1">
-                                    Hinweis ändern
-                                </button>
-                                {% if user[7] == 1 %}
-                                     <button class="btn btn-primary mb-1" disabled>Passwort zurückgesetzt</button>
-                                 {% else %}
-                                    <form id="reset-{{ user[0] }}" action="/reset_user" method="post"
-                                      class="flex-column d-flex mb-1">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen" class="btn btn-primary"
-                                        onclick="deactivate('{{ user[0] }}'); submit();">
-                                    </form>
-                                 {% endif %}
-                                {% if user[6] == 0 %}
-                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: flex !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Blockieren" class="btn btn-primary"
-                                               onclick="block('{{ user[0] }}')">
-                                    </form>
-                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: none !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Entblockieren" class="btn btn-primary"
-                                               onclick="unblock('{{ user[0] }}')">
-                                    </form>
-                                {% else %}
-                                    <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: flex !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Entblockieren" class="btn btn-primary"
-                                               onclick="unblock('{{ user[0] }}')">
-                                    </form>
-                                    <form id="block-{{ user[0] }}" action="/block_user" method="post"
-                                          class="flex-column d-flex mb-1" style="display: none !important;">
-                                        <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                        <input type="submit" value="Blockieren" class="btn btn-primary"
-                                               onclick="block('{{ user[0] }}')">
-                                    </form>
-                                {% endif %}
-                                <form id="form-{{ user[0] }}" action="/delete_user" method="post"
-                                      class="flex-column d-flex">
+                                <form action="/manage_user" method="post"
+                                          class="flex-column d-flex mt-1">
                                     <input type='hidden' name="user_id" value="{{ user[0] }}">
-                                    <input type="submit" value="Löschen" class="btn btn-primary"
-                                           onclick="remove_card('{{ user[0] }}')">
+                                    <input type="submit" value="Verwalten" class="btn btn-primary">
                                 </form>
                             </div>
                             <div class="card-footer text-black">{{ user[3] }}</div>
@@ -211,8 +126,8 @@
                                 <label class="input-group-text" for="user_type_select">Typ</label>
                                 <select class="form-select" name="usertype" id="user_type_select" onchange="explanation(this)">
                                     <option value="Nutzer">Nutzer</option>
-                                    <option value="Nutzer + Bearbeiten">Nutzer + Bearbeiten</option>
                                     <option value="Bearbeiter">Bearbeiter</option>
+                                    <option value="Admin">Admin</option>
                                 </select>
                             </div>
                             <div class="input-group mb-3">
@@ -228,7 +143,7 @@
                                     <option value="Oberstufensprecher">Oberstufensprecher*in</option>
                                     <option value="Schulsprecher">Schulsprecher*in</option>
                                     <option value="Schulkonferenz Mitglied">Schulkonferenz Mitglied</option>
-                                    <option value="SSR-Deligierte">SSR-Deligierte/r</option>
+                                    <option value="SSR-Deligierte/r">SSR-Deligierte/r</option>
                                     <option value="SV-Verbindungslehrkraft">Verbindungslehrkraft</option>
                                 </select>
                             </div>

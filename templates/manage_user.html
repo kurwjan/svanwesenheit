@@ -1,0 +1,346 @@
+{% extends "layout.html" %}
+
+{% block scripts %}
+    <script src="static/scripts/manage_user.js"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="row row-cols-1 row-cols-md-1 g-1">
+            {% if user[3] == 'Admin' %}
+                <div class="col">
+                    <div class="card border-danger mb-3">
+                        <div class="card-header text-black">
+                            <div id="office_group">
+                                <a id="office_text">{% if user[4] == "Multifunktionales Mitglied" %}Multi{% else %}
+                                    {{ user[4] }}{% endif %}</a>
+                                <button type="button" id="type" class="btn btn-outline-danger ms-2 btn-sm"
+                                        onclick="show('office_group', 'edit_office_group')">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Amt ändern
+                                </button>
+                            </div>
+                            <form id="edit_office_group" action="/change_office" method="post" style="display: none;">
+                                <select class="form-select mb-1" name="office" id="office_select">
+                                    <option value="Multifunktionales Mitglied"
+                                            {% if user[4] == "Multifunktionales Mitglied" %}selected{% endif %}>
+                                        Multifunktionales Mitglied
+                                    </option>
+                                    <option value="Unterstufensprecher*in"
+                                            {% if user[4] == "Unterstufensprecher*in" %}selected{% endif %}>
+                                        Unterstufensprecher*in
+                                    </option>
+                                    <option value="Mittelstufensprecher*in"
+                                            {% if user[4] == "Mittelstufensprecher*in" %}selected{% endif %}>
+                                        Mittelstufensprecher*in
+                                    </option>
+                                    <option value="Oberstufensprecher*in"
+                                            {% if user[4] == "Oberstufensprecher*in" %}selected{% endif %}>
+                                        Oberstufensprecher*in
+                                    </option>
+                                    <option value="Schulsprecher*in"
+                                            {% if user[4] == "Schulsprecher*in" %}selected{% endif %}>Schulsprecher*in
+                                    </option>
+                                    <option value="Schulkonferenz Mitglied"
+                                            {% if user[4] == "Schulkonferenz Mitglied" %}selected{% endif %}>
+                                        Schulkonferenz
+                                        Mitglied
+                                    </option>
+                                    <option value="SSR-Deligierte/r"
+                                            {% if user[4] == "SSR-Deligierte/r" %}selected{% endif %}>SSR-Deligierte/r
+                                    </option>
+                                    <option value="Verbindungslehrkraft"
+                                            {% if user[4] == "Verbindungslehrkraft" %}selected{% endif %}>
+                                        Verbindungslehrkraft
+                                    </option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-danger btn-sm mb-2"
+                                        onclick="document.getElementById('office_text').textContent = document.getElementById('office_select').value; if (document.getElementById('office_select').value === 'Multifunktionales Mitglied') { document.getElementById('office_text').textContent = 'Multi' } hide('office_group', 'edit_office_group');">
+                                    <i class="fa-solid fa-check me-1"></i> Fertig
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm mb-2"
+                                        onclick="hide('office_group', 'edit_office_group');">
+                                    <i class="fa-solid fa-xmark me-1"></i> Abbrechen
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            </form>
+                        </div>
+                        <div class="card-body flex-column d-flex text-danger">
+                            <h5 class="card-title">{{ user[2] }}</h5>
+                            <div class="card-text mb-1" id="notice_group">
+                                <a id="notice_text">{{ user[5] }}</a>
+                                <button type="button" class="btn btn-outline-danger ms-2 btn-sm mb-1"
+                                        onclick="show('notice_group', 'edit_notice_group')"
+                                        id="notice">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Hinweis ändern
+                                </button>
+                            </div>
+                            <form id="edit_notice_group" action="/change_notice" method="post" style="display: none;">
+                                <input type="text" name="notice" id="notice_input" class="form-control mb-1"
+                                       value="{{ user[5] }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm mb-2"
+                                        onclick="document.getElementById('notice_text').textContent = document.getElementById('notice_input').value; hide('notice_group', 'edit_notice_group');">
+                                    <i class="fa-solid fa-check me-1"></i> Fertig
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm mb-2"
+                                        onclick="hide('notice_group', 'edit_notice_group');">
+                                    <i class="fa-solid fa-xmark me-1"></i> Abbrechen
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            </form>
+                            {% if user[7] == 1 %}
+                                <button class="btn btn-danger mb-1" disabled>Passwort zurückgesetzt</button>
+                            {% else %}
+                                <form id="reset-{{ user[0] }}" action="/reset_user" method="post"
+                                      class="flex-column d-flex mb-1">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen"
+                                           class="btn btn-danger"
+                                           onclick="deactivate('{{ user[0] }}'); submit();">
+                                </form>
+                            {% endif %}
+                            {% if user[6] == 0 %}
+                                <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: flex !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Blockieren" class="btn btn-danger"
+                                           onclick="block('{{ user[0] }}')">
+                                </form>
+                                <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: none !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Entblockieren" class="btn btn-danger"
+                                           onclick="unblock('{{ user[0] }}')">
+                                </form>
+                            {% else %}
+                                <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: flex !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Entblockieren" class="btn btn-danger"
+                                           onclick="unblock('{{ user[0] }}')">
+                                </form>
+                                <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: none !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Blockieren" class="btn btn-danger"
+                                           onclick="block('{{ user[0] }}')">
+                                </form>
+                            {% endif %}
+                            <form action="/unblock_user" method="post"
+                                  class="flex-column d-flex mb-1" style="display: none !important;">
+                                <input type='hidden' name="user_id">
+                                <input type="submit" value="Entblockieren" class="btn btn-danger">
+                            </form>
+                            <form id="form-{{ user[0] }}" action="/delete_user" method="post"
+                                  class="flex-column d-flex">
+                                <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                <input type="submit" value="Löschen" class="btn btn-danger">
+                            </form>
+                        </div>
+                        <div class="card-footer text-black">
+                            <div id="type_group">
+                                <a id="type_text">{{ user[3] }}</a>
+                                <button type="button" id="type" class="btn btn-outline-danger ms-2 btn-sm"
+                                        onclick="show('type_group', 'edit_type_group')">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Typ ändern
+                                </button>
+                            </div>
+                            <form id="edit_type_group" action="/change_type" method="post" style="display: none;">
+                                <select class="form-select mb-1" name="type" id="type_select">
+                                    <option value="Nutzer" {% if user[3] == "Nutzer" %}selected{% endif %}>Nutzer
+                                    </option>
+                                    <option value="Bearbeiten"
+                                            {% if user[3] == "Bearbeiten" %}selected{% endif %}>Bearbeiten
+                                    </option>
+                                    <option value="Admin" {% if user[3] == "Admin" %}selected{% endif %}>
+                                        Admin
+                                    </option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-danger btn-sm mb-2"
+                                        onclick="document.getElementById('type_text').textContent = document.getElementById('type_select').value; hide('type_group', 'edit_type_group');">
+                                    <i class="fa-solid fa-check me-1"></i> Fertig
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm mb-2"
+                                        onclick="hide('type_group', 'edit_type_group');">
+                                    <i class="fa-solid fa-xmark me-1"></i> Abbrechen
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col">
+                    <div class="card border-primary mb-3">
+                        <div class="card-header text-black">
+                            <div id="office_group">
+                                <a id="office_text">{% if user[4] == "Multifunktionales Mitglied" %}Multi{% else %}
+                                    {{ user[4] }}{% endif %}</a>
+                                <button type="button" id="type" class="btn btn-outline-primary ms-2 btn-sm"
+                                        onclick="show('office_group', 'edit_office_group')">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Amt ändern
+                                </button>
+                            </div>
+                            <form id="edit_office_group" action="/change_office" method="post" style="display: none;">
+                                <select class="form-select mb-1" name="office" id="office_select">
+                                    <option value="Multifunktionales Mitglied"
+                                            {% if user[4] == "Multifunktionales Mitglied" %}selected{% endif %}>
+                                        Multifunktionales Mitglied
+                                    </option>
+                                    <option value="Unterstufensprecher*in"
+                                            {% if user[4] == "Unterstufensprecher*in" %}selected{% endif %}>
+                                        Unterstufensprecher*in
+                                    </option>
+                                    <option value="Mittelstufensprecher*in"
+                                            {% if user[4] == "Mittelstufensprecher*in" %}selected{% endif %}>
+                                        Mittelstufensprecher*in
+                                    </option>
+                                    <option value="Oberstufensprecher*in"
+                                            {% if user[4] == "Oberstufensprecher*in" %}selected{% endif %}>
+                                        Oberstufensprecher*in
+                                    </option>
+                                    <option value="Schulsprecher*in"
+                                            {% if user[4] == "Schulsprecher*in" %}selected{% endif %}>Schulsprecher*in
+                                    </option>
+                                    <option value="Schulkonferenz Mitglied"
+                                            {% if user[4] == "Schulkonferenz Mitglied" %}selected{% endif %}>
+                                        Schulkonferenz
+                                        Mitglied
+                                    </option>
+                                    <option value="SSR-Deligierte/r"
+                                            {% if user[4] == "SSR-Deligierte/r" %}selected{% endif %}>SSR-Deligierte/r
+                                    </option>
+                                    <option value="Verbindungslehrkraft"
+                                            {% if user[4] == "Verbindungslehrkraft" %}selected{% endif %}>
+                                        Verbindungslehrkraft
+                                    </option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-primary btn-sm mb-2"
+                                        onclick="document.getElementById('office_text').textContent = document.getElementById('office_select').value; if (document.getElementById('office_select').value === 'Multifunktionales Mitglied') { document.getElementById('office_text').textContent = 'Multi' } hide('office_group', 'edit_office_group');">
+                                    <i class="fa-solid fa-check me-1"></i> Fertig
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm mb-2"
+                                        onclick="hide('office_group', 'edit_office_group');">
+                                    <i class="fa-solid fa-xmark me-1"></i> Abbrechen
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            </form>
+                        </div>
+                        <div class="card-body flex-column d-flex text-primary">
+                            <h5 class="card-title">{{ user[2] }}</h5>
+                            <div class="card-text mb-1" id="notice_group">
+                                <a id="notice_text">{{ user[5] }}</a>
+                                <button type="button" class="btn btn-outline-primary ms-2 btn-sm mb-1"
+                                        onclick="show('notice_group', 'edit_notice_group')"
+                                        id="notice">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Hinweis ändern
+                                </button>
+                            </div>
+                            <form id="edit_notice_group" action="/change_notice" method="post" style="display: none;">
+                                <input type="text" name="notice" id="notice_input" class="form-control mb-1"
+                                       value="{{ user[5] }}">
+                                <button type="submit" class="btn btn-outline-primary btn-sm mb-2"
+                                        onclick="document.getElementById('notice_text').textContent = document.getElementById('notice_input').value; hide('notice_group', 'edit_notice_group');">
+                                    <i class="fa-solid fa-check me-1"></i> Fertig
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm mb-2"
+                                        onclick="hide('notice_group', 'edit_notice_group');">
+                                    <i class="fa-solid fa-xmark me-1"></i> Abbrechen
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            </form>
+                            {% if user[7] == 1 %}
+                                <button class="btn btn-primary mb-1" disabled>Passwort zurückgesetzt</button>
+                            {% else %}
+                                <form id="reset-{{ user[0] }}" action="/reset_user" method="post"
+                                      class="flex-column d-flex mb-1">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input id="reset_btn-{{ user[0] }}" type="submit" value="Passwort zurücksetzen"
+                                           class="btn btn-primary"
+                                           onclick="deactivate('{{ user[0] }}'); submit();">
+                                </form>
+                            {% endif %}
+                            {% if user[6] == 0 %}
+                                <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: flex !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Blockieren" class="btn btn-primary"
+                                           onclick="block('{{ user[0] }}')">
+                                </form>
+                                <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: none !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Entblockieren" class="btn btn-primary"
+                                           onclick="unblock('{{ user[0] }}')">
+                                </form>
+                            {% else %}
+                                <form id="unblock-{{ user[0] }}" action="/unblock_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: flex !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Entblockieren" class="btn btn-primary"
+                                           onclick="unblock('{{ user[0] }}')">
+                                </form>
+                                <form id="block-{{ user[0] }}" action="/block_user" method="post"
+                                      class="flex-column d-flex mb-1" style="display: none !important;">
+                                    <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                    <input type="submit" value="Blockieren" class="btn btn-primary"
+                                           onclick="block('{{ user[0] }}')">
+                                </form>
+                            {% endif %}
+                            <form action="/unblock_user" method="post"
+                                  class="flex-column d-flex mb-1" style="display: none !important;">
+                                <input type='hidden' name="user_id">
+                                <input type="submit" value="Entblockieren" class="btn btn-primary">
+                            </form>
+                            <form id="form-{{ user[0] }}" action="/delete_user" method="post"
+                                  class="flex-column d-flex">
+                                <input type='hidden' name="user_id" value="{{ user[0] }}">
+                                <input type="submit" value="Löschen" class="btn btn-primary">
+                            </form>
+                        </div>
+                        <div class="card-footer text-black">
+                            <div id="type_group">
+                                <a id="type_text">{{ user[3] }}</a>
+                                <button type="button" id="type" class="btn btn-outline-primary ms-2 btn-sm"
+                                        onclick="show('type_group', 'edit_type_group')">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    Typ ändern
+                                </button>
+                            </div>
+                            <form id="edit_type_group" action="/change_type" method="post" style="display: none;">
+                                <select class="form-select mb-1" name="type" id="type_select">
+                                    <option value="Nutzer" {% if user[3] == "Nutzer" %}selected{% endif %}>Nutzer
+                                    </option>
+                                    <option value="Bearbeiten"
+                                            {% if user[3] == "Bearbeiten" %}selected{% endif %}>Bearbeiten
+                                    </option>
+                                    <option value="Admin" {% if user[3] == "Admin" %}selected{% endif %}>
+                                        Admin
+                                    </option>
+                                </select>
+                                <button type="submit" class="btn btn-outline-primary btn-sm mb-2"
+                                        onclick="document.getElementById('type_text').textContent = document.getElementById('type_select').value; hide('type_group', 'edit_type_group');">
+                                    <i class="fa-solid fa-check me-1"></i> Fertig
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm mb-2"
+                                        onclick="hide('type_group', 'edit_type_group');">
+                                    <i class="fa-solid fa-xmark me-1"></i> Abbrechen
+                                </button>
+                                <input type="hidden" name="user_id" value="{{ user[0] }}">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <form action="/users" class="row justify-content-center">
+            <button class="btn btn-primary mb-3" type="submit">
+                Zurück
+            </button>
+        </form>
+    </div>
+{% endblock %}
