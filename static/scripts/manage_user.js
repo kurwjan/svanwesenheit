@@ -28,17 +28,3 @@ function hide(group_id, edit_group_id) {
     group.style.display = "block";
     edit_group.style.display = "none";
 }
-
-function explanation(selected) {
-    let type_selector = document.getElementById("explanation")
-
-    if (selected.value === "Admin") {
-        type_selector.textContent = "Als Admin kann man neue Sitzungen und Benutzer erstellen/bearbeiten."
-    }
-    else if (selected.value === "Bearbeiter") {
-        type_selector.textContent = "Man kann das gleiche wie ein Admin machen außer Benutzer verwalten."
-    }
-    else {
-        type_selector.textContent = "Als Nutzer kann man die Anwesenheitslisten etc. sehen."
-    }
-}
